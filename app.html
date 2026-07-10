@@ -374,6 +374,10 @@
   .ma-av { width:42px; height:42px; border-radius:50%; flex:none; display:grid; place-items:center; font-weight:700; color:#fff; font-size:1.05rem; background:linear-gradient(150deg,var(--dawn),var(--rose)); }
   .ma-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
   .ma-info b { font-size:1.02rem; }
+  .ma-name { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .ma-plan { font-size:.62rem; font-weight:800; letter-spacing:.04em; border-radius:100px; padding:2px 8px; text-transform:uppercase; white-space:nowrap; }
+  .ma-plan.plus { color:#fff; background:linear-gradient(140deg,var(--dawn),var(--rose)); }
+  .ma-plan.free { color:var(--ink-soft); background:var(--bg-tint); border:1px solid var(--line); }
   .ma-tag { align-self:flex-start; font-size:.66rem; font-weight:700; color:var(--rose); background:color-mix(in srgb,var(--rose) 14%, transparent); border-radius:100px; padding:2px 9px; margin:1px 0; }
   .ma-sub { font-size:.85rem; color:var(--ink-soft); }
   .ma-meta { font-size:.76rem; color:var(--ink-soft); }
@@ -999,7 +1003,7 @@
     var apr=s.filter(function(x){return x.estado==="aprobada";}).length;
     el("admin").innerHTML='<div class="card admin-card"><div class="admin-head"><b>Panel de Aurora · Equipo</b><button class="linklike" id="admBack">← Salir</button></div>'+
       '<h2 class="title" style="margin-top:12px">Mamás registradas</h2>'+
-      '<p class="sub">Las mamás que han creado su cuenta en Aurora. <b id="mamaCount">0</b> registrada(s).</p>'+
+      '<p class="sub">Las mamás que han creado su cuenta en Aurora. <b id="mamaCount">0</b> registrada(s)<span id="mamaPlus"></span>.</p>'+
       '<div id="admMamas"></div>'+
       '<h2 class="title" style="margin-top:24px">Solicitudes de especialistas</h2>'+
       '<p class="sub">Revisa credenciales y documentos, y aprueba o rechaza. <b>'+pend+'</b> pendiente(s) · <b>'+apr+'</b> aprobado(s).</p>'+
@@ -1047,26 +1051,32 @@
     save(); renderAdmin();
   }
   var MAMAS_DEMO=[
-    { nombre:"María Fernanda", apodo:"Mafer", situacion:"Trabajo fuera de casa", edad:"35 a 44", lugar:"Lima, Perú", usuario:"mafer_lima", hijos:2, edades:["8 años","3 años"], fecha:"2026-07-08T09:12:00" },
-    { nombre:"Gabriela Ruiz", apodo:"", situacion:"En casa a tiempo completo", edad:"25 a 34", lugar:"Bogotá, Colombia", usuario:"gabi.ruiz", hijos:1, edades:["6 meses"], fecha:"2026-07-09T14:40:00" },
-    { nombre:"Carolina Méndez", apodo:"Caro", situacion:"Trabajo desde casa", edad:"35 a 44", lugar:"CDMX, México", usuario:"caromendez", hijos:3, edades:["16 años","10 años","2 años"], fecha:"2026-07-09T20:05:00" }
+    { nombre:"María Fernanda", apodo:"Mafer", situacion:"Trabajo fuera de casa", edad:"35 a 44", lugar:"Lima, Perú", usuario:"mafer_lima", hijos:2, edades:["8 años","3 años"], fecha:"2026-07-08T09:12:00", plan:"Plus", tel:"51987654321" },
+    { nombre:"Gabriela Ruiz", apodo:"", situacion:"En casa a tiempo completo", edad:"25 a 34", lugar:"Bogotá, Colombia", usuario:"gabi.ruiz", hijos:1, edades:["6 meses"], fecha:"2026-07-09T14:40:00", plan:"Gratis", tel:"573001234567" },
+    { nombre:"Carolina Méndez", apodo:"Caro", situacion:"Trabajo desde casa", edad:"35 a 44", lugar:"CDMX, México", usuario:"caromendez", hijos:3, edades:["16 años","10 años","2 años"], fecha:"2026-07-09T20:05:00", plan:"Plus", tel:"525512345678" }
   ];
   function fmtFecha(iso){ if(!iso) return ""; try{ var d=new Date(iso); if(isNaN(d.getTime())) return iso; return d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear(); }catch(e){ return iso; } }
   function renderMamas(){ var box=el("admMamas"); if(!box) return;
     var list=MAMAS_DEMO.slice();
-    if(state.usuario){ list.unshift({ nombre:state.mama||displayName(), apodo:state.apodo||"", situacion:state.situacion||"", edad:state.edadRango||"", lugar:state.lugar||"", usuario:state.usuario, hijos:(state.hijos||[]).filter(esKid).length, edades:(state.hijos||[]).filter(esKid).map(function(k){ return edadTxt(k); }), fecha:state.regFecha||"", real:true }); }
+    if(state.usuario){ list.unshift({ nombre:state.mama||displayName(), apodo:state.apodo||"", situacion:state.situacion||"", edad:state.edadRango||"", lugar:state.lugar||"", usuario:state.usuario, hijos:(state.hijos||[]).filter(esKid).length, edades:(state.hijos||[]).filter(esKid).map(function(k){ return edadTxt(k); }), fecha:state.regFecha||"", plan:"Gratis", real:true }); }
+    var plus=list.filter(function(m){ return m.plan==="Plus"; }).length;
     if(el("mamaCount")) el("mamaCount").textContent=list.length;
+    if(el("mamaPlus")) el("mamaPlus").textContent=" · "+plus+" Plus 💛";
     box.innerHTML="";
     list.forEach(function(m){
       var c=document.createElement("div"); c.className="mama-adm"+(m.real?" mama-real":"");
       var sub=[m.situacion,m.edad,m.lugar].filter(Boolean).join(" · ");
       var kids=m.hijos?(m.hijos+" hijo(s)"+((m.edades&&m.edades.length)?": "+m.edades.join(", "):"")):"Sin hijos registrados";
-      c.innerHTML='<span class="ma-av"></span><div class="ma-info"><b></b>'+(m.real?'<span class="ma-tag">Esta cuenta</span>':'')+'<span class="ma-sub"></span><span class="ma-meta"></span><span class="ma-kids"></span></div>';
+      var isPlus=(m.plan==="Plus");
+      c.innerHTML='<span class="ma-av"></span><div class="ma-info">'+
+        '<span class="ma-name"><b></b>'+(m.real?'<span class="ma-tag">Esta cuenta</span>':'')+'<span class="ma-plan '+(isPlus?"plus":"free")+'">'+(isPlus?"Plus":"Gratis")+'</span></span>'+
+        '<span class="ma-sub"></span><span class="ma-meta"></span><span class="ma-kids"></span></div>';
       c.querySelector(".ma-av").textContent=inicial(m.apodo||m.nombre);
       c.querySelector("b").textContent=(m.apodo&&m.apodo.trim())?(m.nombre+' ("'+m.apodo+'")'):m.nombre;
       c.querySelector(".ma-sub").textContent=sub||"—";
       c.querySelector(".ma-meta").textContent="Usuario: "+(m.usuario||"—")+(m.fecha?" · Registro: "+fmtFecha(m.fecha):"");
       c.querySelector(".ma-kids").textContent=kids;
+      if(m.tel){ var chips=document.createElement("div"); chips.className="chips"; chips.appendChild(waChip(m.tel, "💬 Escribir a "+(m.apodo||m.nombre.split(" ")[0]), "Hola "+(m.apodo||m.nombre)+" 💛 Soy del equipo de Aurora.")); c.querySelector(".ma-info").appendChild(chips); }
       box.appendChild(c);
     });
   }
