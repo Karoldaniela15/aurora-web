@@ -1,0 +1,1429 @@
+<title>Aurora — Tu asistente (prototipo)</title>
+
+<style>
+  :root {
+    --bg:#FAF4F1; --bg-elev:#FFFFFF; --bg-tint:#F3E7E4; --ink:#35263F; --ink-soft:#715F79;
+    --line:#ECDCD7; --plum:#5A3A6B; --dawn:#DD8A50; --dawn-soft:#F0B885; --rose:#CE6E84;
+    --sky-1:#F7D9C4; --sky-2:#EFC6C9; --sky-3:#E7D3E4; --ok:#4E9A6B; --wa:#25a56a; --alert:#C56A4E;
+    --shadow:26px 34px 70px -38px rgba(74,46,90,.4);
+    --font-display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --font-body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#1B1526; --bg-elev:#251C33; --bg-tint:#2E2340; --ink:#F4EAF0; --ink-soft:#B7A6C1;
+      --line:#372B48; --plum:#C9A5DB; --dawn:#F2A868; --dawn-soft:#F6C193; --rose:#E68FA2;
+      --sky-1:#3A2846; --sky-2:#4A2E48; --sky-3:#5E3A44; --ok:#6FBF8C; --wa:#2fbd7e; --alert:#E08A6E;
+      --shadow:26px 34px 80px -38px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="light"]{ --bg:#FAF4F1; --bg-elev:#FFFFFF; --bg-tint:#F3E7E4; --ink:#35263F; --ink-soft:#715F79;
+    --line:#ECDCD7; --plum:#5A3A6B; --dawn:#DD8A50; --dawn-soft:#F0B885; --rose:#CE6E84;
+    --sky-1:#F7D9C4; --sky-2:#EFC6C9; --sky-3:#E7D3E4; --ok:#4E9A6B; --wa:#25a56a; --alert:#C56A4E;
+    --shadow:26px 34px 70px -38px rgba(74,46,90,.4); }
+  :root[data-theme="dark"]{ --bg:#1B1526; --bg-elev:#251C33; --bg-tint:#2E2340; --ink:#F4EAF0; --ink-soft:#B7A6C1;
+    --line:#372B48; --plum:#C9A5DB; --dawn:#F2A868; --dawn-soft:#F6C193; --rose:#E68FA2;
+    --sky-1:#3A2846; --sky-2:#4A2E48; --sky-3:#5E3A44; --ok:#6FBF8C; --wa:#2fbd7e; --alert:#E08A6E;
+    --shadow:26px 34px 80px -38px rgba(0,0,0,.6); }
+
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; color:var(--ink); font-family:var(--font-body); line-height:1.55;
+    background:radial-gradient(80% 45% at 50% 0%, var(--sky-1), transparent 60%), var(--bg);
+    -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  h1,h2,h3 { font-family:var(--font-display); font-weight:600; line-height:1.14; margin:0; text-wrap:balance; }
+  .eyebrow { font-size:.72rem; letter-spacing:.2em; text-transform:uppercase; color:var(--dawn); font-weight:700; margin:0 0 10px; }
+
+  .shell { max-width:540px; margin:0 auto; padding:26px 18px 120px; }
+  .top { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .brand { display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-size:1.2rem; font-weight:600; }
+  .brand .mark { width:28px; height:28px; border-radius:8px; display:grid; place-items:center; font-size:15px;
+    background:linear-gradient(150deg,var(--dawn),var(--rose)); box-shadow:0 6px 16px -8px var(--rose); }
+  .brand .mark svg { width:18px; height:18px; display:block; }
+  .top-actions { display:flex; gap:12px; align-items:center; }
+  .langtoggle { display:inline-flex; border:1px solid var(--line); border-radius:100px; overflow:hidden; background:var(--bg-tint); }
+  .langseg { background:none; border:none; font:inherit; font-size:.76rem; font-weight:800; letter-spacing:.02em; color:var(--ink-soft); padding:6px 12px; cursor:pointer; transition:.15s; }
+  .langseg.on { background:linear-gradient(140deg,var(--dawn),var(--rose)); color:#fff; }
+  .langseg:focus-visible { outline:3px solid var(--dawn); outline-offset:2px; }
+  .reset { background:none; border:none; color:var(--ink-soft); font:inherit; font-size:.82rem; cursor:pointer; text-decoration:underline; }
+  #logout { color:var(--rose); }
+
+  .card { background:var(--bg-elev); border:1px solid var(--line); border-radius:24px;
+    padding:28px 24px; box-shadow:var(--shadow); animation:rise .5s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes rise { from { opacity:0; transform:translateY(14px);} to { opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){ .card,.sheet,.view>*{ animation:none !important; } }
+
+  .dots { display:flex; gap:7px; justify-content:center; margin-bottom:22px; }
+  .dots i { width:8px; height:8px; border-radius:50%; background:var(--line); transition:.3s; }
+  .dots i.on { background:linear-gradient(140deg,var(--dawn),var(--rose)); width:22px; border-radius:100px; }
+
+  h2.title { font-size:1.6rem; letter-spacing:-.01em; margin-bottom:6px; }
+  .sub { color:var(--ink-soft); margin:0 0 20px; }
+
+  label { display:block; font-size:.8rem; font-weight:650; margin:0 0 6px; color:var(--ink); }
+  label .opt { font-weight:400; color:var(--ink-soft); }
+  .welcome-card { text-align:center; }
+  .wc-logo { width:64px; height:64px; border-radius:18px; margin:0 auto 18px; display:grid; place-items:center;
+    background:linear-gradient(150deg,var(--dawn),var(--rose)); box-shadow:0 14px 30px -14px var(--rose); }
+  .wc-logo svg { width:40px; height:40px; }
+  .welcome-card .eyebrow { text-align:center; }
+  .wc-points { list-style:none; padding:0; margin:20px 0; text-align:left; display:flex; flex-direction:column; gap:9px; }
+  .wc-points li { background:var(--bg-tint); border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:.95rem; display:flex; align-items:center; gap:11px; }
+  .wc-ic { flex:none; display:inline-flex; width:22px; height:22px; color:var(--rose); }
+  .wc-ic svg { width:22px; height:22px; }
+  .acc-note { font-size:.85rem; color:var(--ink-soft); margin:2px 0 10px; }
+  .admin-link { text-align:center; margin-top:14px; } .admin-link .linklike { color:var(--ink-soft); font-size:.75rem; }
+  .admin-head { display:flex; align-items:center; justify-content:space-between; }
+  .admin-head b { font-size:1rem; }
+  .adm-card { background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:12px; }
+  .adm-card.adm-aprobada { border-color:color-mix(in srgb,var(--ok) 40%, var(--line)); }
+  .adm-card.adm-rechazada { opacity:.55; }
+  .adm-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .adm-top b { font-size:1.05rem; } .adm-esp { display:block; font-size:.85rem; color:var(--dawn); font-weight:600; }
+  .adm-badge { flex:none; font-size:.7rem; font-weight:700; border-radius:100px; padding:4px 10px; white-space:nowrap; }
+  .adm-badge.pend { color:var(--dawn); background:color-mix(in srgb,var(--dawn) 14%, transparent); }
+  .adm-badge.apr { color:var(--ok); background:color-mix(in srgb,var(--ok) 15%, transparent); }
+  .adm-badge.rej { color:var(--alert); background:color-mix(in srgb,var(--alert) 14%, transparent); }
+  .adm-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0; }
+  .adm-l { display:block; font-size:.66rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; }
+  .adm-v { font-size:.92rem; }
+  .adm-bio { font-size:.92rem; color:var(--ink-soft); margin:0 0 10px; }
+  .adm-docs ul { margin:4px 0 10px; padding-left:18px; font-size:.9rem; } .adm-docs li { margin:2px 0; }
+  .adm-contact { font-size:.9rem; margin-bottom:12px; word-break:break-word; }
+  .adm-actions { display:flex; gap:10px; }
+  .adm-actions .btn { padding:11px; }
+  .adm-actions .adm-rej { background:none; color:var(--alert); border:1px solid color-mix(in srgb,var(--alert) 40%, var(--line)); box-shadow:none; }
+  .adm-actions .adm-apr { background:linear-gradient(140deg,var(--ok),#6fbf8c); box-shadow:none; }
+  .login-err { color:var(--alert); font-size:.86rem; margin:0 0 12px; }
+  .req-hint { font-size:.78rem; color:var(--ink-soft); margin:-6px 0 12px; }
+  .legal-inline { font-size:.8rem; margin:-6px 0 14px; } .legal-inline .linklike { color:var(--rose); font-size:.8rem; }
+  .legal-links { text-align:center; font-size:.8rem; margin-top:10px; } .legal-links .linklike { color:var(--ink-soft); font-size:.8rem; }
+  .policy-body { font-size:.92rem; line-height:1.6; color:var(--ink-soft); }
+  .policy-body p { margin:0 0 11px; } .policy-body b { color:var(--ink); }
+  .policy-note { background:var(--bg-tint); border:1px solid var(--line); border-radius:10px; padding:11px 13px; font-size:.82rem; margin-bottom:14px; color:var(--ink); }
+  .checks { display:flex; flex-wrap:wrap; gap:8px; }
+  .chkopt { display:flex; align-items:center; gap:8px; font-size:.9rem; font-weight:500; margin:0;
+    background:var(--bg); border:1px solid var(--line); border-radius:100px; padding:9px 14px; cursor:pointer; }
+  .chkopt input { width:auto; accent-color:var(--rose); margin:0; }
+  input[type=text], input[type=number], input[type=date], input[type=tel], input[type=time], select, textarea {
+    width:100%; font:inherit; font-size:1rem; color:var(--ink);
+    background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:12px 14px; }
+  textarea { resize:vertical; min-height:60px; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { outline:3px solid var(--dawn); outline-offset:1px; border-color:transparent; }
+  .field { margin-bottom:15px; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  .btn { width:100%; font:inherit; font-weight:650; font-size:1.02rem; color:#fff; cursor:pointer;
+    background:linear-gradient(140deg,var(--dawn),var(--rose)); border:none; border-radius:100px;
+    padding:14px 20px; box-shadow:0 14px 30px -14px var(--rose); transition:transform .16s; }
+  .btn:hover { transform:translateY(-2px); }
+  .btn:focus-visible { outline:3px solid var(--dawn); outline-offset:3px; }
+  .btn.ghost { background:none; color:var(--ink-soft); box-shadow:none; border:1px solid var(--line); }
+  .btn.small { width:auto; padding:11px 16px; font-size:.9rem; }
+  .hint { font-size:.8rem; color:var(--ink-soft); margin-top:13px; text-align:center; }
+
+  .add-kid { display:flex; flex-wrap:wrap; gap:8px; align-items:end; margin:4px 0 16px; }
+  .add-kid .f { display:flex; flex-direction:column; }
+  .add-kid .f.name { flex:1 1 100%; }
+  .add-kid .f.age { flex:1 1 70px; }
+  .add-kid .btn { flex:0 0 auto; padding:12px 16px; }
+
+  .kid { display:flex; align-items:center; gap:12px; background:var(--bg-tint); border:1px solid var(--line);
+    border-radius:14px; padding:11px 13px; margin-bottom:10px; }
+  .kid .em { width:36px; height:36px; border-radius:10px; display:grid; place-items:center; font-size:19px; background:var(--bg-elev); flex:none; }
+  .kid .info { flex:1; min-width:0; } .kid .info b { font-size:1rem; } .kid .info span { display:block; font-size:.82rem; color:var(--ink-soft); }
+  .kid .del { background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:1.1rem; padding:4px; }
+  .empty { color:var(--ink-soft); font-size:.9rem; text-align:center; padding:16px 10px; }
+
+  /* ---- app views ---- */
+  .view { animation:rise .4s cubic-bezier(.2,.7,.2,1) both; }
+  .viewhead { margin-bottom:18px; }
+  .vtitle { font-size:1.7rem; letter-spacing:-.01em; }
+  .ico-h { width:1.02em; height:1.02em; display:inline-block; vertical-align:-0.14em; }
+  .vtitle .ico-h { color:var(--rose); }
+  .ico-esp { display:inline-block; }
+  .club-chip .ico-esp { width:1.05em; height:1.05em; vertical-align:-0.16em; }
+  .doc-av .ico-esp { width:24px; height:24px; color:var(--dawn); }
+  #docChips .club-chip { background:var(--bg-elev); border:1.5px solid var(--dawn-soft); color:var(--dawn); box-shadow:0 4px 10px -7px var(--dawn); }
+  #docChips .club-chip:hover { border-color:var(--dawn); }
+  #docChips .club-chip.on { background:linear-gradient(140deg,var(--dawn),var(--rose)); color:#fff; border-color:transparent; box-shadow:0 8px 16px -8px var(--rose); }
+  .vsub { color:var(--ink-soft); margin:6px 0 0; }
+  .hello { font-size:1.8rem; letter-spacing:-.01em; margin-bottom:16px; }
+  .hello .n { color:var(--rose); font-style:italic; }
+
+  .bubbles { background:linear-gradient(180deg, color-mix(in srgb,var(--sky-3) 55%, transparent), transparent 55%);
+    border:1px solid var(--line); border-radius:18px; padding:16px; margin-bottom:24px; }
+  .bubbles .lbl { font-size:.7rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:10px; }
+  .bub { background:var(--bg-elev); border:1px solid var(--line); border-radius:14px; border-bottom-left-radius:5px;
+    padding:12px 14px; font-size:.94rem; } .bub b { font-weight:700; }
+
+  .sabias { background:linear-gradient(155deg, var(--plum), var(--rose)); color:#fff; border-radius:20px;
+    padding:20px 20px 16px; margin-bottom:24px; box-shadow:0 18px 36px -22px var(--rose); }
+  .sabias .sl { font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; font-weight:800; opacity:.92; margin-bottom:9px; }
+  .sabias p { margin:0; font-family:var(--font-display); font-size:1.16rem; line-height:1.45; }
+  .sabias .sfoot { display:block; margin-top:12px; font-size:.76rem; opacity:.8; }
+
+  .sec { margin-bottom:24px; }
+  .sec-h { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .sec-h h3 { font-size:1.12rem; }
+
+  .mcard { background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
+  .mcard .row { display:flex; align-items:center; gap:12px; }
+  .mcard .em { width:40px; height:40px; border-radius:11px; display:grid; place-items:center; font-size:20px; background:var(--bg-tint); flex:none; }
+  .mcard .who { flex:1; min-width:0; } .mcard .who b { font-size:1.05rem; } .mcard .who span { display:block; font-size:.8rem; color:var(--ink-soft); }
+  .mcard .edit { background:none; border:1px solid var(--line); color:var(--ink); border-radius:100px; font:inherit; font-size:.82rem; padding:7px 13px; cursor:pointer; white-space:nowrap; }
+  .mcard .edit.completar { background:linear-gradient(140deg,var(--dawn),var(--rose)); color:#fff; border:none; font-weight:650; }
+  .mcard.incompleta { border-color:color-mix(in srgb,var(--dawn) 45%, var(--line)); }
+  .fam-nudge { background:linear-gradient(160deg,var(--sky-2),var(--sky-3)); border:1px solid var(--line); border-radius:14px; padding:13px 15px; margin-bottom:14px; font-size:.9rem; color:var(--ink); line-height:1.5; }
+  .chip.warn { color:var(--dawn); background:color-mix(in srgb,var(--dawn) 12%, transparent); border-color:color-mix(in srgb,var(--dawn) 30%, transparent); }
+  .chip.done { color:var(--ok); background:color-mix(in srgb,var(--ok) 12%, transparent); border-color:color-mix(in srgb,var(--ok) 30%, transparent); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:11px; }
+  .chip { font-size:.78rem; color:var(--ink-soft); background:var(--bg-tint); border:1px solid var(--line); border-radius:100px; padding:4px 11px; display:inline-flex; align-items:center; gap:5px; }
+  .chip.wa { color:#fff; background:var(--wa); border-color:transparent; text-decoration:none; font-weight:600; }
+
+  .addbar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; align-items:end; }
+  .addbar .ev-f { display:flex; flex-direction:column; }
+  .addbar .ev-f label { font-size:.72rem; margin-bottom:5px; }
+  .addbar .ev-f.evdate { flex:1 1 130px; } .addbar .ev-f.evtime { flex:1 1 110px; } .addbar .ev-f.evtext { flex:1 1 170px; }
+  .addbar .btn { flex:0 0 auto; }
+  .etime { color:var(--dawn); font-weight:700; font-variant-numeric:tabular-nums; margin-left:6px; }
+  .items { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+  .item { display:flex; align-items:center; gap:11px; background:var(--bg); border:1px solid var(--line); border-radius:13px; padding:11px 13px; }
+  .item .date { font-variant-numeric:tabular-nums; font-weight:700; font-size:.8rem; color:var(--dawn); background:var(--bg-tint); border-radius:8px; padding:6px 8px; text-align:center; min-width:52px; flex:none; line-height:1.2; }
+  .item .chk { width:22px; height:22px; border-radius:50%; border:2px solid var(--dawn); background:none; cursor:pointer; flex:none; display:grid; place-items:center; color:#fff; font-size:12px; }
+  .item.done .chk { background:var(--ok); border-color:var(--ok); }
+  .item .tx { flex:1; font-size:.94rem; } .item.done .tx { text-decoration:line-through; color:var(--ink-soft); }
+  .item .x { background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:1rem; }
+
+  /* development cards */
+  .devcard { background:var(--bg); border:1px solid var(--line); border-radius:18px; padding:18px; margin-bottom:14px; }
+  .devcard .dhead { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+  .devcard .em { width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-size:22px; background:var(--bg-tint); flex:none; }
+  .devcard .dhead b { font-size:1.15rem; } .devcard .dhead span { display:block; font-size:.82rem; color:var(--ink-soft); }
+  .dblock { margin-top:14px; }
+  .dblock .dl { font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .dblock.esperar .dl { color:var(--plum); } .dblock.normal .dl { color:var(--ok); } .dblock.alerta .dl { color:var(--alert); }
+  .dblock ul { margin:0; padding-left:2px; list-style:none; display:flex; flex-direction:column; gap:6px; }
+  .dblock li { font-size:.92rem; padding-left:20px; position:relative; }
+  .dblock li:before { content:"•"; position:absolute; left:4px; color:var(--dawn); font-weight:700; }
+  .dblock.alerta li:before { content:"!"; color:var(--alert); }
+  .dblock p { margin:0; font-size:.92rem; color:var(--ink); background:var(--bg-tint); border-radius:11px; padding:11px 13px; }
+  .dtip { margin-top:14px; font-size:.93rem; background:linear-gradient(160deg,var(--sky-3),var(--bg-tint)); border:1px solid var(--line); border-radius:12px; padding:12px 14px; }
+  .tip-note { font-size:.78rem; color:var(--ink-soft); margin-top:12px; text-align:center; }
+
+  /* mi rincón */
+  .carta { background:linear-gradient(160deg,var(--sky-2),var(--sky-3)); border:1px solid var(--line); border-radius:20px; padding:24px 22px; margin-bottom:22px; }
+  .carta p { font-family:var(--font-display); font-size:1.18rem; line-height:1.5; margin:0; color:var(--ink); }
+
+  .versiculo { background:var(--bg-elev); border:1px solid var(--line); border-radius:20px; padding:22px; margin-bottom:22px; text-align:center; }
+  .versiculo .vl { font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--dawn); margin-bottom:12px; }
+  .versiculo p { font-family:var(--font-display); font-style:italic; font-size:1.15rem; line-height:1.5; margin:0; color:var(--ink); }
+  .versiculo .vref { display:block; margin-top:12px; font-size:.86rem; font-weight:650; color:var(--rose); }
+  .versiculo .vint { margin-top:16px; padding-top:15px; border-top:1px solid var(--line); text-align:left; font-size:.93rem; line-height:1.55; color:var(--ink-soft); }
+  .versiculo .vint .vintl { display:block; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--dawn); margin-bottom:6px; }
+  .mood { margin-bottom:22px; }
+  .mood h3 { font-size:1.1rem; margin-bottom:12px; }
+  .mood-row { display:flex; gap:8px; }
+  .mood-btn { flex:1; background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:12px 4px; cursor:pointer; font-size:26px; transition:transform .14s, border-color .2s; }
+  .mood-btn:hover { transform:translateY(-2px); } .mood-btn.on { border-color:var(--dawn); background:var(--bg-tint); }
+  .mood-btn:focus-visible { outline:3px solid var(--dawn); outline-offset:2px; }
+  .mood-resp { margin-top:12px; font-size:.95rem; background:var(--bg-tint); border:1px solid var(--line); border-radius:12px; padding:13px 15px; }
+  .belleza { background:linear-gradient(155deg, var(--rose), var(--dawn)); color:#fff; border-radius:16px;
+    padding:16px 18px; font-size:.98rem; line-height:1.5; box-shadow:0 16px 32px -22px var(--rose); }
+  .ideas { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:9px; }
+  .idea { display:flex; gap:11px; align-items:flex-start; background:var(--bg); border:1px solid var(--line); border-radius:13px; padding:12px 14px; font-size:.93rem; }
+  .idea .ic { font-size:17px; }
+
+  .join-card { background:var(--bg-elev); border:1px solid var(--line); border-radius:20px; padding:22px; box-shadow:var(--shadow); }
+  .join-card .joinchk { margin:-4px 0 16px; }
+  .join-priv { font-size:.8rem; color:var(--ink-soft); margin-top:14px; line-height:1.5; }
+  .club-welcome { background:var(--bg-tint); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:14px; font-size:.86rem; color:var(--ink-soft); line-height:1.5; }
+  .club-normas { background:var(--bg-elev); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:14px; font-size:.88rem; color:var(--ink-soft); line-height:1.5; }
+  .club-normas b { color:var(--ink); display:block; margin-bottom:8px; }
+  .club-normas ul { margin:0 0 8px; padding-left:20px; } .club-normas li { margin:3px 0; }
+  .club-welcome b { color:var(--ink); }
+  .linklike { background:none; border:none; color:var(--rose); font:inherit; font-size:.86rem; font-weight:650; cursor:pointer; text-decoration:underline; padding:0; }
+  .ask-card { width:100%; display:flex; align-items:center; gap:13px; text-align:left; cursor:pointer;
+    background:linear-gradient(150deg,var(--plum),var(--rose)); color:#fff; border:none; border-radius:18px; padding:16px 18px; margin-bottom:24px;
+    box-shadow:0 16px 34px -20px var(--rose); }
+  .ask-card svg { width:26px; height:26px; flex:none; }
+  .ask-card .ask-tx { flex:1; } .ask-card .ask-tx b { display:block; font-size:1.05rem; } .ask-card .ask-tx span { font-size:.86rem; opacity:.9; }
+  .ask-card .ask-arrow { font-size:1.3rem; opacity:.9; }
+  .ask-card:hover { filter:brightness(1.04); }
+  .chat-chips { display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; margin-bottom:12px; -webkit-overflow-scrolling:touch; }
+  .chat-chips .club-chip { background:var(--bg-elev); border-color:var(--rose); color:var(--rose); white-space:nowrap; }
+  #chatFeed .cav svg { width:18px; height:18px; color:var(--rose); }
+  .club-chips { display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; margin-bottom:14px; -webkit-overflow-scrolling:touch; }
+  .club-chip { flex:0 0 auto; background:var(--bg); border:1px solid var(--line); color:var(--ink-soft); border-radius:100px;
+    font:inherit; font-size:.84rem; font-weight:600; padding:8px 14px; cursor:pointer; white-space:nowrap; }
+  .club-chip.on { background:var(--bg-tint); color:var(--rose); border-color:var(--rose); }
+  .feed { display:flex; flex-direction:column; gap:10px; max-height:52vh; overflow-y:auto; padding:4px 2px 8px; }
+  .cmsg { display:flex; gap:9px; align-items:flex-end; }
+  .cmsg.me { justify-content:flex-end; }
+  .cav { width:32px; height:32px; border-radius:50%; background:var(--bg-tint); border:1px solid var(--line); display:grid; place-items:center; font-size:16px; flex:none; }
+  .cbub { max-width:78%; background:var(--bg-elev); border:1px solid var(--line); border-radius:15px; border-bottom-left-radius:5px; padding:9px 13px; }
+  .cmsg.me .cbub { background:linear-gradient(140deg,var(--dawn),var(--rose)); border:none; border-radius:15px; border-bottom-right-radius:5px; color:#fff; }
+  .cbub .cn { display:block; font-size:.74rem; font-weight:700; color:var(--rose); margin-bottom:2px; }
+  .cbub .ct { font-size:.92rem; line-height:1.45; }
+  .cbar { display:flex; gap:8px; margin-top:14px; }
+  .cbar input { flex:1; }
+
+  .doc-card { background:var(--bg-elev); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:12px; }
+  .doc-top { display:flex; align-items:flex-start; gap:12px; }
+  .doc-av { width:46px; height:46px; border-radius:12px; background:var(--bg-tint); display:grid; place-items:center; font-size:23px; flex:none; }
+  .doc-info { flex:1; min-width:0; } .doc-info b { font-size:1.05rem; display:block; }
+  .doc-esp { display:block; font-size:.85rem; color:var(--dawn); font-weight:600; }
+  .doc-stars { display:block; font-size:.82rem; color:#E0A62F; margin-top:2px; }
+  .doc-stars em { color:var(--ink-soft); font-style:normal; margin-left:6px; }
+  .verified { flex:none; font-size:.68rem; font-weight:700; color:var(--ok); background:color-mix(in srgb,var(--ok) 14%, transparent); border:1px solid color-mix(in srgb,var(--ok) 32%, transparent); border-radius:100px; padding:4px 9px; white-space:nowrap; }
+  .doc-bio { font-size:.9rem; color:var(--ink-soft); margin:11px 0 12px; }
+  .doc-cta { width:100%; font:inherit; font-weight:650; font-size:.92rem; color:#fff; background:linear-gradient(140deg,var(--dawn),var(--rose)); border:none; border-radius:100px; padding:11px; cursor:pointer; }
+  .doc-cta.sent { background:var(--ok); }
+  .join-panel { background:var(--bg-tint); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-top:6px; }
+  .doc-req { margin-top:10px; font-size:.88rem; color:var(--ink-soft); line-height:1.5; }
+  .doc-req b { color:var(--ink); display:block; margin-bottom:8px; } .doc-req ul { margin:0 0 8px; padding-left:20px; } .doc-req li { margin:3px 0; }
+  .join-card .checks { flex-direction:column; align-items:stretch; }
+  .join-card .chkopt { border-radius:12px; }
+  .apply-ok { text-align:center; padding:30px 14px; } .apply-ok .ok-ic { font-size:46px; margin-bottom:8px; }
+  .apply-status { display:inline-block; margin-top:14px; font-size:.82rem; font-weight:700; color:var(--dawn); background:color-mix(in srgb,var(--dawn) 12%, transparent); border:1px solid color-mix(in srgb,var(--dawn) 30%, transparent); border-radius:100px; padding:7px 14px; }
+  .apply-ok .wa-preview { text-align:left; max-width:420px; margin:18px auto 0; }
+  .apply-ok .wa-preview .wl { display:block; font-size:.74rem; color:var(--ink-soft); margin-bottom:6px; }
+  .apply-ok .wa-preview .wabub { background:var(--wa); color:#fff; border-radius:12px; border-bottom-left-radius:4px; padding:10px 13px; font-size:.88rem; line-height:1.45; }
+  .cita-ok { font-size:.9rem; line-height:1.5; background:color-mix(in srgb,var(--ok) 10%, transparent); border:1px solid color-mix(in srgb,var(--ok) 30%, transparent); border-radius:12px; padding:12px 14px; }
+  .cita-ok .wa-preview { margin-top:10px; }
+  .cita-ok .wl { display:block; font-size:.74rem; color:var(--ink-soft); margin-bottom:6px; }
+  .cita-ok .wabub { background:var(--wa); color:#fff; border-radius:12px; border-bottom-left-radius:4px; padding:9px 12px; font-size:.86rem; }
+
+  .foryou-note { margin-top:6px; text-align:center; padding:18px; border-radius:16px; background:linear-gradient(160deg,var(--sky-3),var(--bg-tint)); border:1px solid var(--line); }
+  .foryou-note b { display:block; font-family:var(--font-display); font-size:1.1rem; color:var(--ink); }
+  .foryou-note span { font-size:.9rem; color:var(--ink-soft); }
+
+  /* sheet */
+  .sheet-bg { position:fixed; inset:0; background:rgba(30,20,42,.55); backdrop-filter:blur(3px); display:flex; align-items:flex-end; justify-content:center; z-index:60; }
+  .sheet { background:var(--bg-elev); width:100%; max-width:540px; border-radius:24px 24px 0 0; border:1px solid var(--line);
+    padding:24px 22px calc(24px + env(safe-area-inset-bottom)); max-height:92vh; overflow-y:auto; animation:up .32s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes up { from { transform:translateY(30px); opacity:.4; } to { transform:none; opacity:1; } }
+  .sheet-h { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .sheet-h h3 { font-size:1.3rem; } .sheet-h .close { background:none; border:none; font-size:1.4rem; color:var(--ink-soft); cursor:pointer; line-height:1; }
+  .sheet .del-member { margin-top:8px; text-align:center; }
+  .sheet .del-member button { background:none; border:none; color:var(--rose); font:inherit; font-size:.86rem; cursor:pointer; text-decoration:underline; }
+  .pickbtn { width:100%; margin:-6px 0 15px; background:var(--bg-tint); border:1px solid var(--line); color:var(--ink);
+    font:inherit; font-size:.86rem; font-weight:600; padding:10px 14px; border-radius:11px; cursor:pointer; }
+  .pickbtn:hover { border-color:var(--dawn); } .pickbtn:focus-visible { outline:3px solid var(--dawn); outline-offset:2px; }
+  @media (min-width:560px){ .sheet-bg { align-items:center; } .sheet { border-radius:24px; } }
+
+  /* tabbar */
+  .tabbar { position:fixed; bottom:0; left:0; right:0; z-index:40; display:flex; justify-content:center; gap:4px;
+    background:color-mix(in srgb, var(--bg-elev) 88%, transparent); backdrop-filter:blur(12px);
+    border-top:1px solid var(--line); padding:8px 8px calc(8px + env(safe-area-inset-bottom)); }
+  .tab { flex:1 1 0; max-width:120px; background:none; border:none; cursor:pointer; color:var(--ink-soft);
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:3px; font:inherit; font-size:.6rem; font-weight:600;
+    line-height:1.1; text-align:center; padding:6px 1px; border-radius:12px; transition:color .2s; }
+  .tab .ti { display:grid; place-items:center; opacity:.85; transition:.2s; }
+  .tab .ti svg { width:23px; height:23px; display:block; }
+  .tab.on { color:var(--rose); } .tab.on .ti { opacity:1; transform:translateY(-1px); }
+  .tab:focus-visible { outline:3px solid var(--dawn); outline-offset:2px; }
+
+  [hidden] { display:none !important; }
+</style>
+
+<div class="shell">
+  <div class="top">
+    <div class="brand"><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20 12 4.5 19 20"/><path d="M8.6 14.6H15.4"/><path d="M9.7 14.6a2.3 2.3 0 0 1 4.6 0z" fill="#fff" stroke="none"/></g></svg></span> Aurora</div>
+    <div class="top-actions">
+      <div class="langtoggle" id="langToggle" role="group" aria-label="Idioma">
+        <button type="button" class="langseg" data-lang="es">ES</button>
+        <button type="button" class="langseg" data-lang="en">EN</button>
+      </div>
+      <button class="reset" id="logout" hidden data-i18n="logout">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="dots" id="dots"><i class="on"></i><i></i><i></i></div>
+
+  <!-- BIENVENIDA / PORTADA -->
+  <div class="card welcome-card" id="welcome" hidden>
+    <div class="wc-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20 12 4.5 19 20"/><path d="M8.6 14.6H15.4"/><path d="M9.7 14.6a2.3 2.3 0 0 1 4.6 0z" fill="#fff" stroke="none"/></g></svg></div>
+    <p class="eyebrow" data-i18n="wc_eyebrow">Tu amiga y asistente</p>
+    <h2 class="title" data-i18n="wc_title">No tienes que cargarlo todo sola.</h2>
+    <p class="sub" data-i18n="wc_sub">Aurora te acompaña con todo lo de tus hijos, te aconseja según su edad, y te recuerda cuánto vales. 💛</p>
+    <ul class="wc-points">
+      <li><span class="wc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 15c0-3-2.4-5-5.4-5 0 3 2.4 5 5.4 5z"/><path d="M12 12.5c0-2.6 2-4.5 5-4.5 0 2.6-2 4.5-5 4.5z"/></svg></span><span data-i18n="wc_p1">Consejos para cada etapa de tus hijos</span></li>
+      <li><span class="wc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="5"/><path d="M12 9v6M9 12h6"/></svg></span><span data-i18n="wc_p2">Especialistas verificados a un toque</span></li>
+      <li><span class="wc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="2.5"/><circle cx="16" cy="10" r="2"/><path d="M4.5 18.5c0-2.6 2-4.2 4.5-4.2s4.5 1.6 4.5 4.2"/><path d="M15 14.4c2.2 0 3.9 1.4 3.9 3.6"/></svg></span><span data-i18n="wc_p3">Un club de mamás que te entiende</span></li>
+      <li><span class="wc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-6.8-4.2-6.8-9A3.5 3.5 0 0 1 12 8.2 3.5 3.5 0 0 1 18.8 11c0 4.8-6.8 9-6.8 9z"/></svg></span><span data-i18n="wc_p4">Un espacio solo para ti</span></li>
+    </ul>
+    <button class="btn" id="wcStart" data-i18n="wc_start">Comenzar</button>
+    <p class="hint"><span data-i18n="have_account">¿Ya tienes una cuenta?</span> <button class="linklike" id="wcLogin" data-i18n="login_btn">Iniciar sesión</button></p>
+    <p class="legal-links"><button type="button" class="linklike" data-pol="terminos" data-i18n="terms">Términos</button> · <button type="button" class="linklike" data-pol="privacidad" data-i18n="privacy">Privacidad</button></p>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="card" id="login" hidden>
+    <p class="eyebrow" data-i18n="li_eyebrow">Bienvenida de nuevo</p>
+    <h2 class="title" data-i18n="li_title">Hola otra vez 💛</h2>
+    <p class="sub" data-i18n="li_sub">Ingresa a tu cuenta para continuar donde lo dejaste.</p>
+    <div class="field"><label for="liUser" data-i18n="user">Usuario</label><input type="text" id="liUser" autocomplete="off" autocapitalize="none"></div>
+    <div class="field"><label for="liPass" data-i18n="pass">Clave</label><input type="password" id="liPass"></div>
+    <p class="login-err" id="liErr" hidden>Usuario o clave incorrectos. Intenta de nuevo.</p>
+    <button class="btn" id="liBtn" data-i18n="login_btn">Iniciar sesión</button>
+    <p class="hint"><span data-i18n="first_time">¿Primera vez aquí?</span> <button class="linklike" id="liNew" data-i18n="create_new">Crear cuenta nueva</button></p>
+    <p class="hint"><button type="button" class="linklike gohome" data-i18n="home_link">← Ir al inicio</button></p>
+  </div>
+
+  <!-- PANEL ADMIN -->
+  <div id="admin" hidden></div>
+
+  <!-- PASO 1 -->
+  <div class="card" id="step1">
+    <p class="eyebrow" data-i18n="reg_eyebrow">Crea tu cuenta</p>
+    <h2 class="title" data-i18n="reg_title">¡Hola! Soy Aurora</h2>
+    <p class="sub" data-i18n="reg_sub">Seré tu amiga, la que te acompaña y te echa una mano cada día. Cuéntame un poquito de ti para conocernos. Es rápido, y lo opcional puedes saltarlo. 💛</p>
+    <div class="field"><label for="mama" data-i18n="q_name">¿Cómo te llamas?</label><input type="text" id="mama" placeholder="Tu nombre" data-i18n-ph="ph_name" autocomplete="given-name"></div>
+    <div class="field"><label for="apodo"><span data-i18n="q_nick">¿Cómo quieres que te llame?</span> <span class="opt" data-i18n="optional">(opcional)</span></label><input type="text" id="apodo" placeholder="Un apodo cariñoso" data-i18n-ph="ph_nick"></div>
+    <div class="field"><label for="situacion" data-i18n="q_day">Tu día a día</label>
+      <select id="situacion"><option value="" data-i18n="opt_prefer">Prefiero no decir</option><option data-i18n="opt_home">En casa a tiempo completo</option><option data-i18n="opt_workout">Trabajo fuera de casa</option><option data-i18n="opt_workhome">Trabajo desde casa</option><option data-i18n="opt_study">Estudio</option></select></div>
+    <div class="two">
+      <div class="field"><label for="edadRango"><span data-i18n="q_age">Tu edad</span> <span class="opt" data-i18n="optional">(opcional)</span></label>
+        <select id="edadRango"><option value="" data-i18n="opt_prefer">Prefiero no decir</option><option data-i18n="age_u25">Menos de 25</option><option>25 a 34</option><option>35 a 44</option><option data-i18n="age_45">45 o más</option></select></div>
+      <div class="field"><label for="lugar"><span data-i18n="q_city">Ciudad o país</span> <span class="opt" data-i18n="optional">(opcional)</span></label><input type="text" id="lugar" name="ubic_libre" placeholder="Ej: Lima, Perú" data-i18n-ph="ph_city" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" data-lpignore="true" data-form-type="other"></div>
+    </div>
+    <div class="acc-note" data-i18n="acc_note">🔐 Crea tu acceso para guardar tus datos y volver cuando quieras:</div>
+    <div class="field"><label for="usuario" data-i18n="user">Usuario</label><input type="text" id="usuario" autocomplete="off" autocapitalize="none" placeholder="Elige un usuario" data-i18n-ph="ph_user"></div>
+    <div class="two">
+      <div class="field"><label for="clave" data-i18n="pass">Clave</label><input type="password" id="clave" placeholder="Crea una clave" data-i18n-ph="ph_pass"></div>
+      <div class="field"><label for="clave2" data-i18n="pass2">Confirmar clave</label><input type="password" id="clave2" placeholder="Repite la clave" data-i18n-ph="ph_pass2"></div>
+    </div>
+    <p class="req-hint" data-i18n="req_hint">🔑 Mínimo 6 caracteres, con al menos una letra y un número.</p>
+    <label class="chkopt joinchk"><input type="checkbox" id="acceptTerms"> <span data-i18n="accept_terms">He leído y acepto los Términos y la Política de Privacidad.</span></label>
+    <p class="legal-inline"><button type="button" class="linklike" data-pol="terminos" data-i18n="read_terms">Leer Términos</button> · <button type="button" class="linklike" data-pol="privacidad" data-i18n="read_privacy">Leer Política de Privacidad</button></p>
+    <p class="login-err" id="regErr" hidden></p>
+    <button class="btn" id="go1" data-i18n="reg_create">Crear mi cuenta</button>
+    <p class="hint" data-i18n="reg_priv">🔒 Tus datos son solo tuyos y privados.</p>
+    <p class="hint"><span data-i18n="have_account">¿Ya tienes una cuenta?</span> <button class="linklike" id="goLogin" data-i18n="login_btn">Iniciar sesión</button></p>
+    <p class="hint"><button type="button" class="linklike gohome" data-i18n="home_link">← Ir al inicio</button></p>
+  </div>
+
+  <!-- PASO 2 -->
+  <div class="card" id="step2" hidden>
+    <p class="eyebrow" data-i18n="s2_eyebrow">Tu familia</p>
+    <h2 class="title" data-i18n="s2_title">¿A quiénes cuidas cada día?</h2>
+    <p class="sub" data-i18n="s2_sub">Agrega a tus hijos. Después podrás llenar la ficha de cada uno (colegio, pediatra, cumpleaños, y más).</p>
+    <div class="add-kid">
+      <div class="f name"><label for="kname" data-i18n="name">Nombre</label><input type="text" id="kname" placeholder="Ej: Daniela" data-i18n-ph="ph_child"></div>
+      <div class="f age"><label for="kanos" data-i18n="years">Años</label><input type="number" id="kanos" min="0" max="120" placeholder="1"></div>
+      <div class="f age"><label for="kmeses" data-i18n="months">Meses</label><input type="number" id="kmeses" min="0" max="11" placeholder="11"></div>
+      <button class="btn small" id="addkid" data-i18n="add">Agregar</button>
+    </div>
+    <div id="kidlist"></div>
+    <button class="btn" id="go2" data-i18n="continue">Continuar</button>
+    <p class="hint" data-i18n="s2_hint">Puedes agregar los que quieras.</p>
+  </div>
+
+  <!-- PASO 3: app con pestañas -->
+  <div id="step3" hidden><div class="view" id="view"></div></div>
+</div>
+
+<!-- tabbar -->
+<nav class="tabbar" id="tabbar" hidden>
+  <button class="tab on" data-tab="hoy"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.2V19h12V9.2"/></svg></span><span data-i18n="tab_hoy">Hoy</span></button>
+  <button class="tab" data-tab="dev"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 15c0-3-2.4-5-5.4-5 0 3 2.4 5 5.4 5z"/><path d="M12 12.5c0-2.6 2-4.5 5-4.5 0 2.6-2 4.5-5 4.5z"/></svg></span><span data-i18n="tab_dev">Crecer</span></button>
+  <button class="tab" data-tab="club"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="2.5"/><circle cx="16" cy="10" r="2"/><path d="M4.5 18.5c0-2.6 2-4.2 4.5-4.2s4.5 1.6 4.5 4.2"/><path d="M15 14.4c2.2 0 3.9 1.4 3.9 3.6"/></svg></span><span data-i18n="tab_club">Club</span></button>
+  <button class="tab" data-tab="docs"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="5"/><path d="M12 9v6M9 12h6"/></svg></span><span data-i18n="tab_docs">Especialistas</span></button>
+  <button class="tab" data-tab="rincon"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-6.8-4.2-6.8-9A3.5 3.5 0 0 1 12 8.2 3.5 3.5 0 0 1 18.8 11c0 4.8-6.8 9-6.8 9z"/></svg></span><span data-i18n="tab_rincon">Rincón</span></button>
+  <button class="tab" data-tab="familia"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8.5" r="2.1"/><circle cx="17" cy="8.5" r="2.1"/><circle cx="12" cy="13.5" r="1.7"/><path d="M3.8 18c0-2 1.4-3.3 3.2-3.3M20.2 18c0-2-1.4-3.3-3.2-3.3M9.2 19c0-1.7 1.2-2.7 2.8-2.7s2.8 1 2.8 2.7"/></svg></span><span data-i18n="tab_fam">Familia</span></button>
+</nav>
+
+<!-- SHEET -->
+<div class="sheet-bg" id="sheetBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-h"><h3 id="sheetTitle">Ficha</h3><button class="close" id="sheetClose" aria-label="Cerrar">✕</button></div>
+    <div class="field"><label for="fNombre">Nombre</label><input type="text" id="fNombre"></div>
+    <div class="two">
+      <div class="field"><label for="fAnos">Años</label><input type="number" id="fAnos" min="0" max="120"></div>
+      <div class="field"><label for="fMeses">Meses</label><input type="number" id="fMeses" min="0" max="11"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="fSexo">¿Niño o niña?</label><select id="fSexo"><option value="">Prefiero no decir</option><option>Niño</option><option>Niña</option></select></div>
+      <div class="field"><label for="fRol">Es…</label><select id="fRol"><option>Hijo/a</option><option>Pareja</option><option>Otro</option></select></div>
+    </div>
+    <div class="field"><label for="fCumple">Cumpleaños</label><input type="date" id="fCumple"></div>
+    <div class="field"><label for="fColegio">Colegio / Institución</label><input type="text" id="fColegio" placeholder="Ej: Colegio San José"></div>
+    <div class="two">
+      <div class="field"><label for="fTutorNom">Tutor(a) del colegio</label><input type="text" id="fTutorNom" placeholder="Nombre del tutor"></div>
+      <div class="field"><label for="fTutorTel">WhatsApp del tutor</label><input type="tel" id="fTutorTel" placeholder="Ej: 51987654321"></div>
+    </div>
+    <button type="button" class="pickbtn" id="pickTutor">📇 Elegir de mis contactos</button>
+    <div class="two">
+      <div class="field"><label for="fPedNom">Pediatra / Doctor</label><input type="text" id="fPedNom" placeholder="Dr(a). …"></div>
+      <div class="field"><label for="fPedTel">WhatsApp del doctor</label><input type="tel" id="fPedTel" placeholder="Ej: 51987654321"></div>
+    </div>
+    <button type="button" class="pickbtn" id="pickPed">📇 Elegir de mis contactos</button>
+    <div class="field"><label>¿Cómo se alimenta? <span class="opt">(bebés/niños pequeños — puedes elegir varias)</span></label>
+      <div class="checks" id="fAlim">
+        <label class="chkopt"><input type="checkbox" value="Lactancia materna"> Lactancia materna</label>
+        <label class="chkopt"><input type="checkbox" value="Fórmula"> Fórmula</label>
+        <label class="chkopt"><input type="checkbox" value="Mixta (pecho y fórmula)"> Mixta (pecho y fórmula)</label>
+        <label class="chkopt"><input type="checkbox" value="Empezando sólidos"> Empezando sólidos</label>
+        <label class="chkopt"><input type="checkbox" value="Ya destetado/a"> Ya destetado/a</label>
+        <label class="chkopt"><input type="checkbox" value="Ya come de todo"> Ya come de todo</label>
+      </div></div>
+    <div class="field"><label for="fNotas">Alergias / notas importantes</label><textarea id="fNotas" placeholder="Ej: alérgico a la penicilina…"></textarea></div>
+    <button class="btn" id="fSave">Guardar ficha</button>
+    <div class="del-member"><button id="fDelete">Eliminar de mi familia</button></div>
+  </div>
+</div>
+
+<!-- VENTANA DE DOCUMENTOS LEGALES -->
+<div class="sheet-bg" id="policyBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="policyTitle">
+    <div class="sheet-h"><h3 id="policyTitle">Documento</h3><button class="close" id="policyClose" aria-label="Cerrar">✕</button></div>
+    <div class="policy-body" id="policyBody"></div>
+    <button class="btn" id="policyOk" style="margin-top:16px">Entendido</button>
+  </div>
+</div>
+
+<script>
+  var KEY="babypilot_demo_v1";
+  var state=load()||{ mama:"", hijos:[], eventos:[], step:1, tab:"hoy", mood:null, club:{}, clubSala:"", clubJoined:false, clubProfile:null, usuario:"", clave:"" };
+  normalize();
+
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  function uid(){ return "m"+Date.now()+Math.floor(Math.random()*1000); }
+  function normalize(){
+    state.hijos=(state.hijos||[]).map(function(k){
+      var anos,meses;
+      if(k.anos!==undefined||k.meses!==undefined){ anos=(k.anos===undefined?"":k.anos); meses=(k.meses===undefined?"":k.meses); }
+      else if(k.unidad==="meses"){ anos=""; meses=(k.edad===""||k.edad===undefined?"":k.edad); }
+      else { anos=(k.edad===""||k.edad===undefined?"":k.edad); meses=""; }
+      return { id:k.id||uid(), nombre:k.nombre||"", anos:anos, meses:meses, sexo:k.sexo||"", rol:k.rol||"Hijo/a",
+        cumple:k.cumple||"", colegio:k.colegio||"", tutorNom:k.tutorNom||"", tutorTel:k.tutorTel||"",
+        pedNom:k.pedNom||"", pedTel:k.pedTel||"", alim:(Array.isArray(k.alim)?k.alim:(k.alim?[k.alim]:[])), notas:k.notas||"" };
+    });
+    state.eventos=state.eventos||[]; if(!state.tab) state.tab="hoy"; state.club=state.club||{}; state.clubJoined=!!state.clubJoined; if(!state.lang) state.lang="es";
+    if(!state.solicitudes) state.solicitudes=[
+      {id:"s1", nombre:"Dra. Paula Méndez", esp:"Pediatra", col:"CMP 45231", lugar:"Lima, Perú", exp:"9", email:"paula.mendez@correo.com", tel:"51987000111", mod:"Ambas", bio:"Pediatra con enfoque cálido en lactancia, sueño y primeros años.", docs:["Título profesional","Colegiatura vigente","Certificado de especialidad","Documento de identidad"], estado:"pendiente"},
+      {id:"s2", nombre:"Lic. Andrés Rocha", esp:"Psicólogo/a", col:"CPsP 8891", lugar:"Bogotá, Colombia", exp:"6", email:"andres.rocha@correo.com", tel:"57310222333", mod:"Online", bio:"Psicólogo de niños y adolescentes; acompañamiento a familias.", docs:["Título profesional","Colegiatura vigente","Documento de identidad"], estado:"pendiente"}
+    ];
+    state.aprobados=state.aprobados||[]; state.chat=state.chat||[];
+  }
+
+  var el=function(id){ return document.getElementById(id); };
+  var _sv='<svg class="ico-h" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
+  var ICO={
+    grow:_sv+'<path d="M12 21v-8"/><path d="M12 15c0-3-2.4-5-5.4-5 0 3 2.4 5 5.4 5z"/><path d="M12 12.5c0-2.6 2-4.5 5-4.5 0 2.6-2 4.5-5 4.5z"/></svg>',
+    club:_sv+'<circle cx="9" cy="9" r="2.5"/><circle cx="16" cy="10" r="2"/><path d="M4.5 18.5c0-2.6 2-4.2 4.5-4.2s4.5 1.6 4.5 4.2"/><path d="M15 14.4c2.2 0 3.9 1.4 3.9 3.6"/></svg>',
+    docs:_sv+'<rect x="4" y="4" width="16" height="16" rx="5"/><path d="M12 9v6M9 12h6"/></svg>',
+    heart:_sv+'<path d="M12 20s-6.8-4.2-6.8-9A3.5 3.5 0 0 1 12 8.2 3.5 3.5 0 0 1 18.8 11c0 4.8-6.8 9-6.8 9z"/></svg>',
+    fam:_sv+'<circle cx="7" cy="8.5" r="2.1"/><circle cx="17" cy="8.5" r="2.1"/><circle cx="12" cy="13.5" r="1.7"/><path d="M3.8 18c0-2 1.4-3.3 3.2-3.3M20.2 18c0-2-1.4-3.3-3.2-3.3M9.2 19c0-1.7 1.2-2.7 2.8-2.7s2.8 1 2.8 2.7"/></svg>',
+    sun:_sv+'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></svg>',
+    bulb:_sv+'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.5 1 .5 1.6h6c0-.6 0-1.2.5-1.6A6 6 0 0 0 12 3z"/></svg>',
+    cal:_sv+'<rect x="4" y="5" width="16" height="16" rx="3"/><path d="M4 9h16M9 3v4M15 3v4"/></svg>',
+    book:_sv+'<path d="M12 6.5C10.5 5 8 4.5 5 5v13c3-.5 5.5 0 7 1.5 1.5-1.5 4-2 7-1.5V5c-3-.5-5.5 0-7 1.5z"/><path d="M12 6.5v13"/></svg>',
+    spark:_sv+'<path d="M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6z"/></svg>',
+    check:_sv+'<circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.3l2.5 2.5 4.9-5.4"/></svg>',
+    alert:_sv+'<path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/></svg>',
+    chat:_sv+'<path d="M21 11.5a8 8 0 0 1-8 8 8.4 8.4 0 0 1-3.6-.9L4 20l1.4-4.1A8 8 0 1 1 21 11.5z"/><path d="M8.5 11h7M8.5 14h4"/></svg>'
+  };
+  var _se='<svg class="ico-esp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">';
+  var ESICO={
+    todos:_se+'<circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/><circle cx="8" cy="16" r="1.5"/><circle cx="16" cy="16" r="1.5"/></svg>',
+    pediatra:_se+'<circle cx="12" cy="13" r="5.5"/><circle cx="7.6" cy="7.4" r="1.9"/><circle cx="16.4" cy="7.4" r="1.9"/><path d="M10.4 15c.9.7 2.3.7 3.2 0"/></svg>',
+    general:_se+'<path d="M4 12h3l2-5 3 11 2.5-6H20"/></svg>',
+    psico:_se+'<circle cx="12" cy="12" r="8.4"/><path d="M12 15s-2.6-1.6-2.6-3.3A1.4 1.4 0 0 1 12 10.6a1.4 1.4 0 0 1 2.6.1c0 1.7-2.6 3.3-2.6 3.3z"/></svg>',
+    nutri:_se+'<path d="M12 8.5c-1.6-1.6-5.2-1-5.2 2.6S9 20 12 20s5.2-6.3 5.2-9.9-3.6-4.2-5.2-2.6z"/><path d="M12 8.5c0-2 1.6-3.2 3.2-3.2"/></svg>',
+    lactancia:_se+'<path d="M9 9.5h6V19a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2z"/><path d="M10 6.5h4l-.5 3h-3z"/><path d="M9 12.5h6M9 15h6"/></svg>',
+    gine:_se+'<circle cx="12" cy="9" r="4.6"/><path d="M12 13.6V20M9 17.2h6"/></svg>',
+    psicoped:_se+'<path d="M12 7C10.5 5.6 8 5.1 5 5.6v12.6c3-.5 5.5 0 7 1.4 1.5-1.4 4-1.9 7-1.4V5.6c-3-.5-5.5 0-7 1.4z"/><path d="M12 7v12.6"/></svg>',
+    odonto:_se+'<path d="M8 4.2C6 4.2 5 5.7 5 8.2c0 3 1 4 1.6 7 .4 2 2.1 1.8 2.5-.3l.6-3c.2-1 .4-1 .6 0l.6 3c.4 2.1 2.1 2.3 2.5.3.6-3 1.6-4 1.6-7 0-2.5-1-4-3-4-1.2 0-1.8.7-3 .7s-1.8-.7-3-.7z"/></svg>'
+  };
+  function esc(s){ return String(s||"").replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}); }
+  function hasAge(m){ return (m.anos!==""&&m.anos!=null)||(m.meses!==""&&m.meses!=null); }
+  function incAlim(m,v){ return (m.alim||[]).indexOf(v)>=0; }
+  function months(m){ return (Number(m.anos)||0)*12+(Number(m.meses)||0); }
+  function yearsOf(m){ return months(m)/12; }
+  function emoji(m){ if(m.rol==="Pareja") return "❤️"; if(m.rol==="Otro") return "🧑";
+    var ty=hasAge(m)?yearsOf(m):null;
+    if(ty!==null && ty<=3) return "👶";
+    if(m.sexo==="Niña") return "👧"; if(m.sexo==="Niño") return "👦";
+    if(ty===null) return "🧑"; if(ty<=12) return "🧒"; return "🧑"; }
+  function edadTxt(m){ if(!hasAge(m)) return m.rol;
+    var A=(m.anos===""||m.anos==null)?null:Number(m.anos), M=(m.meses===""||m.meses==null)?null:Number(m.meses), parts=[];
+    if(A) parts.push(A+(A===1?" año":" años")); if(M) parts.push(M+(M===1?" mes":" meses"));
+    if(!parts.length) return "Recién nacido"; return parts.join(" "); }
+  function genero(m){
+    var y=hasAge(m)?yearsOf(m):null, joven=(y!==null && y<13);
+    if(m.sexo==="Niño") return joven?"niño":"hijo";
+    if(m.sexo==="Niña") return joven?"niña":"hija";
+    return "hijo/a";
+  }
+  function esKid(m){ return m.rol==="Hijo/a"; }
+  function dayIndex(){ var n=new Date(), s=new Date(n.getFullYear(),0,0); return Math.floor((n-s)/86400000); }
+  function rotArr(arr,count,day){ if(!arr||!arr.length) return []; count=Math.min(count,arr.length); var out=[]; for(var i=0;i<count;i++) out.push(arr[(day+i)%arr.length]); return out; }
+  function pickOne(arr,day){ if(Array.isArray(arr)) return arr.length?arr[day%arr.length]:""; return arr||""; }
+  function displayName(){ return (state.apodo&&state.apodo.trim())||state.mama||"mamá"; }
+
+  var MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  function fmt(d,two){ if(!d) return two?"—":""; var p=d.split("-"); if(p.length<3) return d;
+    if(two) return Number(p[2])+"<br>"+MES[Number(p[1])-1]; return Number(p[2])+" "+MES[Number(p[1])-1]; }
+  function hora12(h){ if(!h) return ""; var p=h.split(":"), H=Number(p[0]), M=p[1]||"00", ap=H>=12?"pm":"am", h12=H%12; if(h12===0)h12=12; return h12+":"+M+" "+ap; }
+  function birthdayToday(){ var n=new Date(), mm=n.getMonth()+1, dd=n.getDate();
+    for(var i=0;i<state.hijos.length;i++){ var c=state.hijos[i].cumple; if(!c) continue; var p=c.split("-"); if(Number(p[1])===mm&&Number(p[2])===dd) return state.hijos[i].nombre; } return null; }
+  function nextEvent(){ var today=new Date().toISOString().slice(0,10);
+    var up=state.eventos.filter(function(e){ return e.fecha&&e.fecha>=today&&!e.hecho; }).sort(function(a,b){ return (a.fecha+(a.hora||"")).localeCompare(b.fecha+(b.hora||"")); }); return up[0]||null; }
+
+  /* ---------------- contenido ---------------- */
+  var MOTIVA=["Estás haciendo un trabajo enorme, aunque nadie lo vea.","Ninguna mamá lo sabe todo, y aun así lo estás logrando.",
+    "Tu familia es afortunada de tenerte.","Hoy no tienes que ser perfecta, solo tú misma.","Cada pequeña cosa que haces por ellos, importa.",
+    "Eres más fuerte de lo que crees.","Lo estás haciendo mejor de lo que piensas.","Un paso a la vez. Vas muy bien.",
+    "Tu amor es lo que sostiene a esta familia.","Date crédito hoy: no es fácil, y ahí estás.","Nadie podría hacer lo que tú haces por ellos.",
+    "Confía en ti: tu instinto de mamá casi nunca se equivoca.","Eres suficiente, tal como eres.","Hoy también mereces cosas buenas."];
+  function motivador(){ return MOTIVA[dayIndex()%MOTIVA.length]; }
+
+  // tags: bebe (0-3), nino (3-10), preado (10-13), ado (13+), mama (universal, siempre relevante)
+  var SABIAS=[
+    { t:"El cerebro de tu bebé forma más de un millón de conexiones nuevas por segundo durante sus primeros años, la etapa de mayor desarrollo de toda su vida. Por eso cada palabra que le dices, cada canción y cada abrazo están, literalmente, construyendo su cerebro.", tags:["bebe"] },
+    { t:"Los bebés reconocen la voz de su mamá desde antes de nacer, porque la escuchaban dentro del vientre. Por eso, al llegar a un mundo nuevo y desconocido, tu voz es lo que más los calma y les dice 'estás a salvo'.", tags:["bebe"] },
+    { t:"Cuando consuelas a tu bebé que llora, no lo estás 'malcriando': le enseñas que puede confiar en el mundo. De hecho, los bebés atendidos con cariño suelen convertirse en niños más seguros e independientes, no lo contrario.", tags:["bebe"] },
+    { t:"La leche materna es un fluido vivo: cambia su composición según la hora del día e incluso según lo que el bebé necesita. Si tu bebé se enferma, tu cuerpo produce más anticuerpos en la leche para ayudarlo a defenderse.", tags:["bebe"] },
+    { t:"El contacto piel con piel hace algo asombroso: regula la temperatura, la respiración y los latidos del bebé, y baja las hormonas del estrés en los dos. Es una de las medicinas más poderosas que existen… y es totalmente gratis.", tags:["bebe"] },
+    { t:"Antes de los 6 u 8 meses, un bebé no tiene la capacidad mental de 'manipular' con el llanto: llorar es su único idioma para decir 'te necesito'. Responderle no lo vuelve dependiente, lo vuelve seguro.", tags:["bebe"] },
+    { t:"El olor de su mamá puede calmar a un bebé e incluso reducir el dolor que siente durante una vacuna. Tu cercanía es, para él, el analgésico más natural que existe.", tags:["bebe"] },
+    { t:"Ya sea con pecho o con fórmula, los bebés pueden crecer igual de sanos, fuertes y amados. Una mamá tranquila y presente le da mucho más que la culpa por cómo lo alimenta.", tags:["bebe"] },
+    { t:"A los 2 años, el cerebro de un niño ya alcanzó cerca del 80% del tamaño que tendrá de adulto. Todo lo que vive, juega y siente en estos primeros años deja una huella profunda para el resto de su vida.", tags:["bebe"] },
+    { t:"El sueño desordenado de un bebé no es un fracaso tuyo: su reloj interno tarda varios meses en aprender la diferencia entre el día y la noche. Despertarse de madrugada es pura biología, no algo que estés haciendo mal.", tags:["bebe"] },
+    { t:"Cantarle a tu bebé, aunque sientas que desafinas, fortalece su lenguaje, su memoria y el vínculo contigo. Para él no existe mejor voz en todo el mundo que la tuya.", tags:["bebe"] },
+    { t:"Cuando le 'conversas' a tu bebé y le das espacio para responder con sus balbuceos ('¿ah sí? ¿y qué más?'), impulsas enormemente su desarrollo del lenguaje. Esas pequeñas charlas de ida y vuelta valen oro.", tags:["bebe"] },
+    { t:"La primera risa de un bebé suele aparecer entre los 3 y 4 meses, y es mucho más que ternura: es una de sus primeras formas de comunicarse y de conectar contigo.", tags:["bebe"] },
+    { t:"Desde sus primeros días de vida, tu bebé prefiere mirar tu rostro por encima de cualquier otro estímulo del mundo. Para él, tu cara es el lugar más interesante y seguro que existe.", tags:["bebe"] },
+    { t:"Los bebés suelen 'hablar' con las manos antes que con la voz: señalar y decir adiós son grandes hitos del lenguaje. Es su manera de decirte 'mira eso' mucho antes de poder nombrarlo.", tags:["bebe"] },
+    { t:"Las rabietas no son mala conducta ni un capricho: son un cerebro pequeño desbordado por emociones enormes que todavía no sabe manejar. Tu calma en esos momentos es justo lo que, poco a poco, le enseña a calmarse.", tags:["bebe","nino"] },
+    { t:"Leerle a un niño, aunque aún no entienda todas las palabras, hace crecer su vocabulario y su imaginación durante años. Los niños a quienes se les lee de pequeños suelen tener más facilidad en el colegio.", tags:["bebe","nino"] },
+    { t:"Los niños aprenden mucho mejor lo que SÍ pueden hacer que una larga lista de 'no'. En vez de 'no corras', un 'caminemos despacito' funciona más… y evita muchas peleas.", tags:["bebe","nino"] },
+    { t:"Jugar es el trabajo más serio de la infancia: mientras juega, un niño aprende a resolver problemas, a imaginar, a esperar su turno y a convivir. No está perdiendo el tiempo, está construyendo su mente.", tags:["bebe","nino"] },
+    { t:"El aburrimiento en los niños no es algo malo que debas evitar: es justamente el espacio donde nace la creatividad. Un niño aburrido termina inventando, imaginando y descubriendo por su cuenta.", tags:["nino","preado"] },
+    { t:"El juego al aire libre mejora la concentración, el sueño y hasta el ánimo de los niños. A veces, media hora afuera resuelve más que cualquier reto o castigo dentro de casa.", tags:["nino","preado"] },
+    { t:"Ponerle nombre a la emoción de tu hijo ('veo que estás frustrado') en realidad ayuda a calmar su cerebro. Sentirse entendido baja la intensidad de lo que siente, en los niños y también en los grandes.", tags:["bebe","nino","preado"] },
+    { t:"Entre los 10 y 12 años, las amistades pasan a ser el centro de su mundo y de su autoestima. Si lo escuchas sin juzgar cuando te cuenta las cosas 'pequeñas', te seguirá contando las grandes más adelante.", tags:["preado"] },
+    { t:"Que un preadolescente empiece a querer más privacidad y a cerrar su puerta no es un rechazo hacia ti: es una señal sana de que está formando su propia identidad.", tags:["preado","ado"] },
+    { t:"Los adolescentes no te rechazan de verdad: su cerebro está programado para buscar independencia y separarse un poco. Aunque parezca que no te necesitan, tu presencia tranquila sigue siendo su ancla.", tags:["ado"] },
+    { t:"El cerebro de un adolescente sigue madurando hasta cerca de los 25 años, en especial la zona que mide riesgos y consecuencias. Por eso a veces actúan sin pensar: no es maldad, es un cerebro todavía en obras.", tags:["ado"] },
+    { t:"Con un adolescente, escuchar sin sermonear abre más puertas que cualquier consejo. Muchas veces no busca que le resuelvas el problema, sino sentir que alguien de su lado de verdad lo entiende.", tags:["ado"] },
+    { t:"Los niños que se sienten escuchados desarrollan más confianza y una autoestima más sólida. No hace falta darles la razón en todo: basta con que sientan que su voz importa en casa.", tags:["nino","preado","ado"] },
+    { t:"Los hijos aprenden a manejar sus emociones sobre todo observando cómo tú manejas las tuyas. Cuando te ven respirar hondo en vez de explotar, están aprendiendo, sin darse cuenta, a hacer lo mismo.", tags:["nino","preado","ado"] },
+    { t:"Comer juntos en familia, aunque sea unas pocas veces por semana, se asocia con niños más seguros, mejor comunicación y hasta mejores notas. No importa tanto el menú como el simple hecho de estar.", tags:["nino","preado","ado"] },
+    { t:"Decir 'te amo' y 'estoy orgullosa de ti' nutre la autoestima de un hijo a cualquier edad. Con el tiempo, esas palabras se vuelven la voz interior con la que él se habla a sí mismo. Tu ternura de hoy es su fortaleza de mañana.", tags:["nino","preado","ado","adulto","mama"] },
+    { t:"Un abrazo de al menos 20 segundos libera oxitocina, la llamada 'hormona del amor', tanto en ti como en tu hijo. Es una forma rápida y gratis de reconectar en medio de un día difícil.", tags:["bebe","nino","preado","ado","mama"] },
+    { t:"Cuando logras descansar aunque sea un poco, mejora tu paciencia, tu memoria y tu ánimo. Cuidar tu descanso no es un lujo egoísta: es parte de poder cuidar bien a tu familia.", tags:["mama"] },
+    { t:"Cada hijo tiene su propio ritmo en cada etapa de la vida. Comparar al tuyo con otros casi nunca ayuda, y muchas veces solo te roba una tranquilidad que mereces tener.", tags:["mama"] },
+    { t:"Pedir ayuda no te hace menos mamá. Ninguna mujer está hecha para cargarlo absolutamente todo, todo el tiempo y ella sola: apoyarte en otros también es cuidar de tus hijos.", tags:["mama"] },
+    { t:"Aunque tu hijo ya sea adulto, tu opinión y tu cariño siguen siendo un apoyo enorme para él. Nunca dejas de ser su mamá, solo cambia la forma de acompañarlo.", tags:["adulto","mama"] },
+    { t:"Soltar a los hijos poco a poco —darles decisiones y responsabilidades según su edad— no es alejarlos: es prepararlos para una vida propia y segura. Y también le da paz a la mamá.", tags:["preado","ado","adulto","mama"] },
+    { t:"En muchas familias cuesta 'soltar': a veces la mamá, a veces el hijo, a veces los dos. Dar independencia de forma gradual y con amor ayuda a ambos a crecer sanos y felices.", tags:["ado","adulto","mama"] },
+    { t:"Dar independencia a un hijo no es dejar de amarlo ni de cuidarlo: es confiar en lo que le enseñaste. Volar seguro empieza con pequeños permisos que crecen con él.", tags:["ado","adulto"] },
+    { t:"Con un hijo adulto, acompañar sin dirigir es un gran acto de amor: es confiar en la persona que criaste y respetar su propio camino.", tags:["adulto"] },
+    { t:"La relación con un hijo grande se cuida con respeto a su independencia y con la puerta siempre abierta. Saber que estás ahí, sin presionar, es lo que más lo acerca.", tags:["adulto"] },
+    { t:"La 'carga mental' tiene nombre desde hace poco, pero las madres la llevan desde siempre: no es solo hacer las cosas, es ser la que las recuerda, las anticipa y se preocupa por todas. Solo ponerle nombre ya alivia.", tags:["mama"] },
+    { t:"Tus hijos no van a recordar una infancia perfecta; van a recordar cómo se sintieron contigo. La presencia y el afecto pesan mucho más que cualquier error que creas haber cometido.", tags:["bebe","nino","preado","ado","adulto","mama"] },
+    { t:"Soltar a un hijo no significa que dejó de necesitarte; significa que hiciste bien tu trabajo. La meta de criar nunca fue retener, sino preparar a alguien para volar por su cuenta.", tags:["ado","adulto","mama"] },
+    { t:"Muchas mamás repiten, sin darse cuenta, patrones con los que ellas crecieron. Reconocer uno y elegir hacerlo distinto puede cambiar la historia emocional de toda una familia.", tags:["mama"] },
+    { t:"Cuidar a otros durante años puede hacer que una mujer olvide quién es más allá de ser mamá. Reencontrarte contigo misma no es egoísmo: es recuperar una parte tuya que también merece vivir.", tags:["mama"] }
+  ];
+  function kidTags(){ var s={ mama:true };
+    state.hijos.filter(function(m){ return esKid(m)&&hasAge(m); }).forEach(function(m){ var y=yearsOf(m);
+      if(y<3) s.bebe=true; else if(y<10) s.nino=true; else if(y<13) s.preado=true; else if(y<18) s.ado=true; else s.adulto=true; }); return s; }
+  function sabias(){ var tags=kidTags();
+    var pool=SABIAS.filter(function(f){ return f.tags.some(function(t){ return tags[t]; }); });
+    if(!pool.length) pool=SABIAS;
+    return pool[dayIndex()%pool.length].t; }
+
+  var AGE_TIPS=[
+    { max:0.5, tips:["La leche (materna o fórmula) es todo su alimento por ahora; aún no necesita agua ni comida.","Acostarlo boca arriba a dormir lo protege. Su sueño en ratos cortos es normal.","El contacto piel con piel lo calma y fortalece su vínculo contigo.","Llora para comunicarse, no para manipularte. Responderle le da seguridad."]},
+    { max:1, tips:["Buen momento para empezar alimentos, sin quitar la leche. Ofrece variedad poco a poco.","Explora todo con la boca: cuida los objetos pequeños a su alcance.","Las rutinas de sueño (baño, cuento, dormir) empiezan a ayudar mucho."]},
+    { max:3, tips:["Las rabietas son normales: aún no sabe manejar emociones grandes. Acompáñalo con calma.",
+      { t:"Si aún lactas y piensas en el destete, hazlo gradual y sin culpa; tú y tu bebé marcan el ritmo.", if:function(m){ return incAlim(m,"Lactancia materna")||incAlim(m,"Mixta (pecho y fórmula)"); } },
+      { t:"A esta edad ya puede comer casi de todo en trocitos; la variedad le ayuda a comer mejor.", if:function(m){ return incAlim(m,"Ya destetado/a")||incAlim(m,"Ya come de todo")||incAlim(m,"Fórmula")||incAlim(m,"Empezando sólidos"); } },
+      "Ponerle nombre a lo que siente ('estás enojado') le enseña a entender sus emociones.","Dile qué SÍ puede hacer, en vez de solo 'no'."]},
+    { max:6, tips:["El juego y el '¿por qué?' constante son señal de que su mente está floreciendo.","Límites claros y cariñosos le dan seguridad; la firmeza no pelea con el amor.","Elogia el esfuerzo ('lo intentaste mucho'), no solo el resultado."]},
+    { max:10, tips:["Rutinas para tareas y sueño le bajan el estrés a toda la casa.","Pregúntale por su día con calma; sentirse escuchado fortalece su confianza.","Acuerden juntos el tiempo de pantallas; funciona mejor que prohibir de golpe."]},
+    { max:13, tips:["Si lo notas más callado o aislado, no lo fuerces: acércate con curiosidad, sin juzgar.","Empieza a necesitar más privacidad; respetarla mantiene la confianza abierta.","Su autoestima se forma ahora: valora quién es, no solo sus notas.","Dale pequeñas responsabilidades y decisiones propias: es el primer paso hacia una independencia sana."]},
+    { max:18, tips:["Escuchar sin sermonear es lo que más abre la comunicación a esta edad.","Dale independencia con acuerdos claros; confiar (con límites) los hace responsables.","Interésate por su mundo (amigos, música) sin invadir; eso te acerca.","Soltar de a poco —permisos, decisiones, hasta algunos errores propios— no es perderlo: es prepararlo para volar seguro.","Cuesta soltar, y es normal. Pero darle autonomía gradual los hace bien a los dos, a ti y a él."]},
+    { max:999, tips:["Aunque ya sean grandes, tu apoyo sigue importando. Acompaña sin dirigir.","Soltar a un hijo adulto es un acto de amor y confianza: tu hogar sigue siendo su refugio, pero su vida ya es suya.","Confía en lo que le enseñaste. Darle su espacio no es dejar de amarlo, es respetar su propio camino."]}
+  ];
+  function tipFor(m,offset){ var y=yearsOf(m), band; for(var i=0;i<AGE_TIPS.length;i++){ if(y<AGE_TIPS[i].max){ band=AGE_TIPS[i]; break; } } if(!band) band=AGE_TIPS[AGE_TIPS.length-1];
+    var elig=band.tips.map(function(t){ return typeof t==="string"?{t:t}:t; }).filter(function(t){ return !t.if||t.if(m); });
+    if(!elig.length) return null; return elig[(dayIndex()+(offset||0))%elig.length].t; }
+
+  // desarrollo por edad (maxM = meses máximos de la etapa)
+  var DEV=[
+    { maxM:1, et:"Recién nacido", esperar:["Duerme casi todo el día, en ratos cortos","Se comunica llorando","Enfoca objetos a 20–30 cm de su carita","Se sobresalta con ruidos fuertes (reflejo normal)","Agarra tu dedo con fuerza"], normal:["Comer cada 2–3 horas, día y noche. El sueño irregular es esperable.","Que regurgite un poco tras comer y haga muchas deposiciones.","Que estornude o hipe seguido: está regulando su cuerpo."], alerta:["Moja muy pocos pañales o come muy poco","Cualquier fiebre en un recién nacido: consulta siempre","Color amarillo intenso en piel u ojos"] },
+    { maxM:3, et:"1 a 3 meses", esperar:["Empieza a sonreír a propósito","Sostiene un poco la cabeza boca abajo","Sigue objetos con la mirada","Hace arrullos y sonidos","Se calma con tu voz"], normal:["El llanto de la tarde y los cólicos son comunes y van pasando.","Querer brazos casi todo el tiempo: necesita contacto.","Dormir mucho de día y despertarse de noche."], alerta:["No reacciona a sonidos fuertes","No sostiene nada la cabeza","No sigue objetos con la vista"] },
+    { maxM:6, et:"3 a 6 meses", esperar:["Se ríe a carcajadas","Agarra cosas y se las lleva a la boca","Empieza a girarse","Juega con sonidos y balbucea","Reconoce tu cara y sonríe"], normal:["Babea mucho; no siempre es que le salgan dientes.","Se despierta de noche aunque antes dormía más.","Se lleva todo a la boca para explorar."], alerta:["No sonríe a las personas","Se siente muy rígido o muy flojito","No intenta alcanzar objetos"] },
+    { maxM:9, et:"6 a 9 meses", esperar:["Se sienta sin apoyo","Puede empezar papillas/sólidos","Balbucea 'ba-ba', 'da-da'","Pasa objetos de una mano a otra","Responde a su nombre"], normal:["Llorar con desconocidos es señal de un buen vínculo contigo.","Rechazar algunas comidas nuevas al principio.","Despertarse más por la ansiedad de separación."], alerta:["No se sienta ni con ayuda","No emite ningún sonido","No responde a su nombre"] },
+    { maxM:12, et:"9 a 12 meses", esperar:["Gatea o se desplaza","Se para agarrándose de los muebles","Dice 'mamá' o 'papá' con sentido","Hace pinza con los dedos","Aplaude o dice adiós con la mano"], normal:["Comer con las manos y ensuciar todo es parte de aprender.","Tener miedo a separarse de ti (ansiedad de separación).","Comer menos algunos días: su crecimiento se desacelera."], alerta:["No hace gestos (adiós con la mano)","No se sostiene de pie con apoyo","No dice ninguna sílaba"] },
+    { maxM:18, et:"12 a 18 meses", esperar:["Da sus primeros pasos","Dice varias palabras","Imita lo que hacen los adultos","Señala lo que quiere","Disfruta juegos de esconder y aparecer"], normal:["Cada niño camina a su ritmo; entre 12 y 18 meses es normal.","Aferrarse a un objeto o mantita para sentirse seguro.","Comer poco y ser 'selectivo': es común a esta edad."], alerta:["No camina a los 18 meses","No dice ninguna palabra","No señala ni muestra objetos"] },
+    { maxM:24, et:"18 a 24 meses", esperar:["Corre y sube escaleras con ayuda","Junta 2 palabras ('más agua')","Señala partes del cuerpo","Empieza a jugar imitando","Quiere hacer cosas 'solito'"], normal:["Las primeras rabietas aparecen: aún no maneja la frustración.","Decir 'no' a casi todo: está descubriendo su voluntad.","Querer una rutina fija y molestarse si cambia."], alerta:["No dice al menos 6 palabras","Pierde habilidades que ya tenía","No imita ni juega"] },
+    { maxM:36, et:"2 a 3 años", esperar:["Frases de 2–3 palabras","Juega a imitar (cocinita, muñecos)","Empieza el control de esfínteres","Corre, salta y trepa","Nombra objetos y personas"], normal:["Decir 'no' a todo y buscar independencia es sano a esta edad.","Tener rabietas intensas cuando se frustra.","No querer compartir todavía: aún está aprendiendo."], alerta:["No forma frases cortas","No juega ni imita a otros","No camina con estabilidad"] },
+    { maxM:60, et:"3 a 5 años", esperar:["Habla con oraciones completas","Salta y pedalea","Pregunta '¿por qué?' todo el tiempo","Juega con otros niños","Dibuja formas y personas simples"], normal:["Tiene amigos imaginarios y mezcla fantasía con realidad.","Tener miedos nuevos (oscuridad, monstruos).","Poner a prueba los límites para entender las reglas."], alerta:["Cuesta mucho entender lo que dice","No se interesa por jugar con otros niños","No sigue instrucciones simples"] },
+    { maxM:108, et:"5 a 9 años", esperar:["Aprende a leer y escribir","Hace amigos y sigue reglas de juego","Gana independencia","Desarrolla intereses propios","Entiende el bien y el mal"], normal:["Compararse ('¿soy bueno en esto?') forma su autoestima.","Cansarse o frustrarse con la carga escolar a veces.","Querer más tiempo con amigos que con la familia."], alerta:["Dificultad escolar fuerte y sostenida","Cambios bruscos de ánimo o conducta","Le cuesta mucho hacer amigos"] },
+    { maxM:144, et:"9 a 12 años", esperar:["Empiezan los cambios del cuerpo (pubertad)","Las amistades se vuelven muy importantes","Piensa de forma más abstracta","Busca algo de independencia","Le importa la justicia y lo 'justo'"], normal:["Querer más privacidad y alejarse un poco es parte de crecer.","Cambios de humor por las hormonas.","Dudar de sí mismo y compararse con otros."], alerta:["Aislamiento marcado o tristeza que no pasa","Cambios fuertes en sueño o apetito","Caída notable en el colegio"] },
+    { maxM:180, et:"12 a 15 años", esperar:["Busca su identidad y más independencia","Cuestiona las reglas","Vive emociones intensas","Le importa mucho encajar con sus pares","Desarrolla su propio criterio"], normal:["Cambios de humor y preferir a los amigos sobre la casa.","Querer decidir por sí mismo y discutir los límites.","Necesitar más horas de sueño de las que crees."], alerta:["Tristeza profunda o ansiedad marcada","Aislarse por completo o conductas de riesgo","Cambios bruscos de amistades y ánimo"] },
+    { maxM:216, et:"15 a 18 años", esperar:["Piensa en su futuro (estudios, trabajo)","Relaciones más profundas","Mayor autonomía","Forma sus propios valores"], normal:["Debatir y no estar de acuerdo contigo es parte de madurar.","Necesitar su espacio y su tiempo a solas.","Cuestionar tus ideas mientras arma las suyas."], alerta:["Señales de tristeza profunda o ansiedad sostenida","Aislarse por completo o conductas de riesgo"] },
+    { maxM:99999, et:"Joven adulto", esperar:["Ya es adulto/a; tu rol es de apoyo","Construye su propia vida","Toma sus propias decisiones","Tu casa sigue siendo su refugio"], normal:["Acompañar sin dirigir mantiene la relación sana.","Que te necesite distinto: menos control, más apoyo.","Que a veces solo quiera que lo escuches, no consejos."], alerta:[] }
+  ];
+  function devFor(m){ var mo=months(m); for(var i=0;i<DEV.length;i++){ if(mo<DEV[i].maxM) return DEV[i]; } return DEV[DEV.length-1]; }
+
+  var CARTAS=[
+    "Eres el corazón de tu casa, y lo llevas con una fuerza que a veces ni tú misma notas. Hoy reconócetela.",
+    "Ser mamá saca cada día lo mejor de ti: tu ingenio, tu paciencia, tu amor. Eres mucho más capaz de lo que crees.",
+    "Tu familia florece por todo lo que tú siembras. Eso tiene un valor enorme, y tú lo haces posible.",
+    "Tienes un instinto de mamá poderoso. Confía en ti: sabes más de lo que a veces te dices.",
+    "Cuidarte a ti también es parte de ser una gran mamá. Mereces tu propio tiempo y tu propio cariño.",
+    "Hoy date crédito por todo lo bueno que haces: es muchísimo más de lo que te detienes a ver.",
+    "Tu casa está llena de amor, y ese amor lo creas tú. No necesita ser perfecta para ser hermosa.",
+    "Mereces la misma ternura y admiración que repartes cada día. Empieza hoy por dártela tú."
+  ];
+  function carta(){ return CARTAS[dayIndex()%CARTAS.length]; }
+
+  var VERSICULOS=[
+    { t:"La mujer sabia edifica su casa; mas la necia con sus manos la derriba.", ref:"Proverbios 14:1", i:"Con tus decisiones diarias construyes un hogar lleno de amor. Lo que haces importa muchísimo más de lo que crees." },
+    { t:"Fuerza y honor son su vestidura; y se ríe de lo por venir.", ref:"Proverbios 31:25", i:"Tu fortaleza es tu mejor vestido. Puedes mirar el futuro con confianza: eres más fuerte de lo que imaginas." },
+    { t:"Se levantan sus hijos y la llaman bienaventurada; y su marido también la alaba.", ref:"Proverbios 31:28", i:"Aunque hoy no te lo digan, tu familia valora todo lo que haces. Tu entrega deja una huella de amor." },
+    { t:"Mujer virtuosa, ¿quién la hallará? Porque su estima sobrepasa largamente a la de las piedras preciosas.", ref:"Proverbios 31:10", i:"Tu valor no se mide en cosas: vales más que cualquier tesoro. Nunca lo olvides." },
+    { t:"Engañosa es la gracia, y vana la hermosura; la mujer que teme a Jehová, ésa será alabada.", ref:"Proverbios 31:30", i:"Lo que de verdad te hace hermosa es tu corazón, y eso no se marchita con el tiempo." },
+    { t:"He aquí, herencia de Jehová son los hijos; cosa de estima el fruto del vientre.", ref:"Salmos 127:3", i:"Tus hijos son un regalo, y fuiste tú la elegida para cuidarlos. Eso te hace especial." },
+    { t:"Instruye al niño en su camino, y aun cuando fuere viejo no se apartará de él.", ref:"Proverbios 22:6", i:"Cada valor que siembras hoy dará fruto toda su vida. Tu labor es una inversión que nunca se pierde." },
+    { t:"Corrige a tu hijo, y te dará descanso, y dará alegría a tu alma.", ref:"Proverbios 29:17", i:"Poner límites con amor no te hace mala mamá: les da seguridad, y con el tiempo, paz también para ti." },
+    { t:"Y vosotros, padres, no provoquéis a ira a vuestros hijos, sino criadlos en disciplina y amonestación del Señor.", ref:"Efesios 6:4", i:"Educar con paciencia llega más lejos que el enojo. Guiar con amor siempre da mejores frutos." },
+    { t:"Padres, no exasperéis a vuestros hijos, para que no se desalienten.", ref:"Colosenses 3:21", i:"Corregir sin herir mantiene vivo su ánimo. Tu ternura los hace más fuertes, no más débiles." },
+    { t:"El que halla esposa halla el bien, y alcanza la benevolencia de Jehová.", ref:"Proverbios 18:22", i:"Tú eres una bendición para tu hogar. Tu presencia es un bien, aunque a veces no te lo reconozcan." },
+    { t:"Maridos, amad a vuestras mujeres, así como Cristo amó a la iglesia y se entregó a sí mismo por ella.", ref:"Efesios 5:25", i:"El amor verdadero se entrega. Tú también mereces ser amada y cuidada así." },
+    { t:"El amor es sufrido, es benigno; el amor no tiene envidia, no es jactancioso, no se envanece.", ref:"1 Corintios 13:4", i:"El amor paciente y amable es la meta de cada día, en la pareja y con los hijos. No te exijas perfección: basta con intentarlo." },
+    { t:"Mejores son dos que uno; porque si cayeren, el uno levantará a su compañero.", ref:"Eclesiastés 4:9-10", i:"No tienes que hacerlo todo sola. Apoyarte en quienes te aman también es sabiduría." },
+    { t:"Pero yo y mi casa serviremos a Jehová.", ref:"Josué 24:15", i:"Guiar tu hogar con fe le da una base firme a tu familia. Tú marcas el rumbo de tu casa." },
+    { t:"Si Jehová no edificare la casa, en vano trabajan los que la edifican.", ref:"Salmos 127:1", i:"No cargas sola: puedes apoyarte en Dios para sostener tu hogar. No todo depende de tus fuerzas." },
+    { t:"Los que esperan a Jehová tendrán nuevas fuerzas; levantarán alas como las águilas; correrán, y no se cansarán.", ref:"Isaías 40:31", i:"Cuando te sientas sin energía, tus fuerzas pueden renovarse. Este cansancio no es para siempre." },
+    { t:"Esfuérzate y sé valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo dondequiera que vayas.", ref:"Josué 1:9", i:"No estás sola en esto. Puedes enfrentar el día con valentía, porque hay una fuerza mayor contigo." },
+    { t:"Todo lo puedo en Cristo que me fortalece.", ref:"Filipenses 4:13", i:"Eres capaz de más de lo que crees. No dependes solo de ti: tienes una fuerza que te sostiene." },
+    { t:"Dios está en medio de ella; no será conmovida. Dios la ayudará al clarear la mañana.", ref:"Salmos 46:5", i:"Aunque el día se sienta pesado, no vas a caer. La ayuda llega, justo cuando amanece." }
+  ];
+  function versiculo(){ return VERSICULOS[dayIndex()%VERSICULOS.length]; }
+  var IDEAS=[
+    ["☕","Tómate algo rico solo para ti, sin apuro."],["🚶‍♀️","Sal a tomar aire un momento, aunque sea a la puerta."],
+    ["📱","Escríbele a una amiga. No tienes que cargarlo todo sola."],["😴","Descansa 10 minutos cuando puedas; no es pereza, es recarga."],
+    ["🎵","Pon una canción que te guste mientras haces algo."],["🛁","Regálate un baño tranquilo cuando se pueda."]
+  ];
+  function ideasHoy(){ var d=dayIndex(); return [IDEAS[d%IDEAS.length], IDEAS[(d+2)%IDEAS.length], IDEAS[(d+4)%IDEAS.length]]; }
+  var BELLEZA=[
+    "Aplica tu crema hidratante con la piel aún húmeda tras la ducha: así retiene mucho mejor la humedad y luce más fresca.",
+    "Beber agua durante el día es el secreto de belleza más barato que existe: hidrata tu piel desde adentro y le da luz.",
+    "El protector solar es el mejor 'antiarrugas' del mundo, y también funciona en días nublados. Úsalo aunque estés en casa cerca de ventanas.",
+    "Un poco de vaselina o bálsamo en labios, pestañas y cejas antes de dormir los deja suaves y cuidados mientras descansas.",
+    "Cucharas frías (o rodajas de pepino) unos minutos bajo los ojos desinflaman las ojeras del cansancio. Un truco de 5 minutos.",
+    "Guarda un labial y tu rímel en el bolso: en un minuto te dan 'cara de descansada' cualquier día de prisa.",
+    "Peina tus cejas hacia arriba con un cepillito: abre la mirada y da frescura al rostro incluso sin maquillaje.",
+    "Masajea tu cara un minuto al ponerte la crema: activa la circulación, desinflama y te regala un momento solo para ti.",
+    "Un moño alto o una trenza rápida se ven arreglados en 30 segundos los días en que no hay tiempo para nada.",
+    "El aceite de coco o de oliva sirve como mascarilla exprés para las puntas secas del cabello. Aplícalo un rato antes de lavarlo.",
+    "Exfolia suavemente tus labios con un cepillo de dientes húmedo: quedan lisos y listos para cualquier labial.",
+    "Dormir sobre una funda de almohada suave (o de satén) ayuda a evitar marcas en la cara y que el pelo se enrede menos.",
+    "Elige un par de 'combinaciones estrella' de ropa que te encanten y te queden bien: verte linda sin pensar mucho también es autocuidado.",
+    "Un toque de rubor o bálsamo con color en las mejillas devuelve el buen semblante en segundos los días de poco sueño.",
+    "Respira hondo y relaja los hombros mientras te aplicas tu crema: convierte 2 minutos de rutina en una pequeña pausa para ti."
+  ];
+  function belleza(){ return BELLEZA[dayIndex()%BELLEZA.length]; }
+  var MOODS=[
+    {e:"😔", r:"Gracias por ser honesta. Hasta las mamás más fuertes tienen días así, y tú lo eres. Mañana es una nueva oportunidad. 💛"},
+    {e:"😟", r:"Está bien no estar al 100% hoy. Elige una sola cosa que te haga bien y deja que el resto espere."},
+    {e:"🙂", r:"¡Qué bueno! Regálate un momentito para disfrutar tu día tú también."},
+    {e:"😊", r:"¡Me encanta leerte así! Tu bienestar brilla y contagia a toda tu familia. 🌟"}
+  ];
+
+  /* ---------------- navegación ---------------- */
+  function showWelcome(){
+    el("welcome").hidden=false; el("login").hidden=true; el("step1").hidden=true; el("step2").hidden=true; el("step3").hidden=true; el("admin").hidden=true;
+    el("dots").hidden=true; el("logout").hidden=true; el("tabbar").hidden=true;
+  }
+  function showLogin(){
+    el("welcome").hidden=true; el("login").hidden=false; el("step1").hidden=true; el("step2").hidden=true; el("step3").hidden=true; el("admin").hidden=true;
+    el("dots").hidden=true; el("logout").hidden=true; el("tabbar").hidden=true;
+    if(el("liUser")) el("liUser").value=state.usuario||""; if(el("liPass")) el("liPass").value=""; if(el("liErr")) el("liErr").hidden=true;
+  }
+  function showStep(n){
+    state.step=n; save(); el("login").hidden=true; el("welcome").hidden=true; el("admin").hidden=true;
+    el("step1").hidden=n!==1; el("step2").hidden=n!==2; el("step3").hidden=n!==3;
+    el("logout").hidden=n!==3; el("dots").hidden=n===3; el("tabbar").hidden=n!==3;
+    var d=el("dots").children; for(var i=0;i<d.length;i++) d[i].className=(i<n)?"on":"";
+    if(n===3) renderTab();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){
+    t.addEventListener("click", function(){ state.tab=t.getAttribute("data-tab"); save(); renderTab(); });
+  });
+  function renderTab(){
+    Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){ t.classList.toggle("on", t.getAttribute("data-tab")===state.tab); });
+    if(state.tab==="hoy") renderHoy(); else if(state.tab==="dev") renderDev(); else if(state.tab==="club") renderClub(); else if(state.tab==="docs") renderDocs(); else if(state.tab==="rincon") renderRincon(); else renderFamilia();
+    window.scrollTo(0,0);
+  }
+
+  /* ---------------- paso 1 y 2 ---------------- */
+  function regErr(msg){ var e=el("regErr"); e.textContent=msg; e.hidden=false; }
+  el("go1").addEventListener("click", function(){
+    var v=el("mama").value.trim(); if(!v){ regErr("Escribe tu nombre para continuar."); el("mama").focus(); return; }
+    var u=el("usuario").value.trim(), p=el("clave").value, p2=el("clave2").value;
+    if(u.length<3){ regErr("Elige un usuario de al menos 3 caracteres."); el("usuario").focus(); return; }
+    if(!/^(?=.*[a-zA-Z])(?=.*\d).{6,}$/.test(p)){ regErr("La clave debe tener mínimo 6 caracteres, con al menos una letra y un número."); el("clave").focus(); return; }
+    if(p!==p2){ regErr("Las claves no coinciden. Verifícalas."); el("clave2").focus(); return; }
+    if(!el("acceptTerms").checked){ regErr("Debes aceptar los Términos y la Política de Privacidad para crear tu cuenta."); return; }
+    el("regErr").hidden=true;
+    state.mama=v; state.apodo=el("apodo").value.trim(); state.situacion=el("situacion").value;
+    state.edadRango=el("edadRango").value; state.lugar=el("lugar").value.trim();
+    state.usuario=u; state.clave=p;
+    save(); renderKids(); showStep(2); });
+  el("mama").addEventListener("keydown", function(e){ if(e.key==="Enter") el("go1").click(); });
+  el("liBtn").addEventListener("click", function(){
+    var u=el("liUser").value.trim(), p=el("liPass").value;
+    /* acceso de administrador deshabilitado en la version publica */
+    if(state.usuario && u===state.usuario && p===state.clave){ el("liErr").hidden=true; showStep(state.hijos.length?3:2); }
+    else { el("liErr").textContent = state.usuario ? "Usuario o clave incorrectos. Intenta de nuevo." : "Aún no tienes cuenta. Toca “Crear cuenta nueva”."; el("liErr").hidden=false; }
+  });
+  el("liPass").addEventListener("keydown", function(e){ if(e.key==="Enter") el("liBtn").click(); });
+  el("liNew").addEventListener("click", function(){ showStep(1); });
+  el("goLogin").addEventListener("click", function(){ showLogin(); });
+  el("logout").addEventListener("click", function(){ showLogin(); });
+  el("wcStart").addEventListener("click", function(){ showStep(1); });
+  el("wcLogin").addEventListener("click", function(){ showLogin(); });
+  Array.prototype.forEach.call(document.querySelectorAll(".gohome"), function(b){ b.addEventListener("click", showWelcome); });
+
+  var PNOTE='<div class="policy-note">📋 Versión preliminar. Este documento será revisado por un abogado antes del lanzamiento oficial de Aurora.</div>';
+  var POLICIES={
+    terminos:{ t:"Términos y Condiciones", h:PNOTE+
+      '<p><b>1. Qué es Aurora.</b> Aurora es una app de acompañamiento y organización para mamás: ofrece información general, recordatorios y una comunidad. <b>No reemplaza la atención médica, psicológica ni legal profesional.</b></p>'+
+      '<p><b>2. Tu cuenta.</b> Eres responsable de tu usuario, tu clave y la información que registras. Debes ser mayor de edad para crear una cuenta.</p>'+
+      '<p><b>3. Uso adecuado.</b> Te comprometes a usar Aurora con respeto y a no publicar contenido ofensivo, falso o que dañe a otras personas.</p>'+
+      '<p><b>4. Información, no consejo profesional.</b> Los consejos, datos y contenidos son orientativos. Ante dudas de salud, consulta siempre a un profesional. En una emergencia, acude a los servicios de urgencia.</p>'+
+      '<p><b>5. Especialistas.</b> Aurora es un directorio que conecta mamás con profesionales verificados. La atención y sus resultados son responsabilidad de cada especialista, no de Aurora.</p>'+
+      '<p><b>6. Limitación de responsabilidad.</b> Aurora no se hace responsable por decisiones tomadas con base en la información de la app.</p>'+
+      '<p><b>7. Cambios.</b> Podemos actualizar estos Términos; te avisaremos de los cambios importantes.</p>'+
+      '<p><b>8. Contacto.</b> soporte@aurora.app (correo de ejemplo).</p>' },
+    privacidad:{ t:"Política de Privacidad", h:PNOTE+
+      '<p><b>1. Qué datos guardamos.</b> Datos de la mamá (nombre, contacto, preferencias) y los datos de sus hijos que ella decida registrar (edad, colegio, salud básica, etc.).</p>'+
+      '<p><b>2. Datos de menores.</b> Los datos de los niños los registra la mamá, bajo su responsabilidad y consentimiento. Se tratan con el máximo cuidado y solo para ayudarte a organizarte y personalizar el contenido.</p>'+
+      '<p><b>3. Para qué los usamos.</b> Para darte recordatorios, consejos por edad y funciones personalizadas. <b>Nunca vendemos tus datos</b> ni los de tus hijos.</p>'+
+      '<p><b>4. Con quién se comparten.</b> No compartimos tu información con terceros sin tu permiso, salvo obligación legal.</p>'+
+      '<p><b>5. Seguridad.</b> Protegemos tus datos con medidas de seguridad; en la versión final estarán cifrados.</p>'+
+      '<p><b>6. Tus derechos.</b> Puedes acceder, corregir o eliminar tu información cuando quieras.</p>'+
+      '<p><b>7. Contacto.</b> privacidad@aurora.app (correo de ejemplo).</p>' },
+    conducta:{ t:"Normas y Código de Conducta del Club", h:'<div class="policy-note">💛 Un espacio seguro se construye entre todas.</div>'+
+      '<p><b>1. Respeto siempre.</b> Nada de juicios, burlas ni descalificaciones. Cada mamá vive su propia realidad.</p>'+
+      '<p><b>2. Cero tolerancia.</b> Prohibido el odio, los insultos, el acoso, la discriminación o el contenido violento.</p>'+
+      '<p><b>3. Privacidad.</b> Lo que se comparte en el club, se queda en el club. No difundas información de otras mamás.</p>'+
+      '<p><b>4. No es atención médica.</b> El club es apoyo entre pares; no reemplaza a un profesional. Ante una crisis, busca ayuda profesional.</p>'+
+      '<p><b>5. Moderación.</b> Un equipo, junto a Aurora, cuida el espacio. Puedes reportar cualquier contenido.</p>'+
+      '<p><b>6. Consecuencias.</b> Incumplir estas normas puede llevar a la suspensión o expulsión del club.</p>' },
+    especialistas:{ t:"Código de Conducta para Especialistas", h:'<div class="policy-note">👩‍⚕️ Compromiso de calidad y ética con las familias.</div>'+
+      '<p><b>1. Verificación.</b> Para aparecer en Aurora verificamos tu título, tu colegiatura vigente, tu especialidad y que no tengas sanciones. La membresía es mensual.</p>'+
+      '<p><b>2. Ética profesional.</b> Te comprometes a atender con respeto, basándote en evidencia, sin discriminación ni publicidad engañosa.</p>'+
+      '<p><b>3. Confidencialidad.</b> Debes proteger la información de las familias que atiendes.</p>'+
+      '<p><b>4. Responsabilidad.</b> La atención y sus resultados son de tu entera responsabilidad profesional. Aurora es un medio de conexión.</p>'+
+      '<p><b>5. Calidad continua.</b> Las mamás valoran tu atención. Una valoración baja sostenida o faltas al código pueden llevar a tu suspensión.</p>'+
+      '<p><b>6. Datos.</b> Usa los datos de contacto solo para la atención solicitada, nunca para otros fines.</p>' }
+  };
+  function openPolicy(k){ var p=POLICIES[k]; if(!p) return; el("policyTitle").textContent=p.t; el("policyBody").innerHTML=p.h; el("policyBg").hidden=false; }
+  function closePolicy(){ el("policyBg").hidden=true; }
+  el("policyClose").addEventListener("click", closePolicy);
+  el("policyOk").addEventListener("click", closePolicy);
+  el("policyBg").addEventListener("click", function(e){ if(e.target===el("policyBg")) closePolicy(); });
+  document.addEventListener("click", function(e){ var b=e.target.closest("[data-pol]"); if(b){ e.preventDefault(); openPolicy(b.getAttribute("data-pol")); } });
+
+  /* ---------------- idioma (ES / EN) ---------------- */
+  var T={ es:{}, en:{} };
+  (function(){
+    var es={
+      logout:"Cerrar sesión", reset:"Empezar de nuevo",
+      tab_hoy:"Hoy", tab_dev:"Crecer", tab_club:"Club", tab_docs:"Especialistas", tab_rincon:"Rincón", tab_fam:"Familia",
+      wc_eyebrow:"Tu amiga y asistente", wc_title:"No tienes que cargarlo todo sola.",
+      wc_sub:"Aurora te acompaña con todo lo de tus hijos, te aconseja según su edad, y te recuerda cuánto vales. 💛",
+      wc_p1:"Consejos para cada etapa de tus hijos", wc_p2:"Especialistas verificados a un toque",
+      wc_p3:"Un club de mamás que te entiende", wc_p4:"Un espacio solo para ti",
+      wc_start:"Comenzar", have_account:"¿Ya tienes una cuenta?", login_btn:"Iniciar sesión", terms:"Términos", privacy:"Privacidad",
+      li_eyebrow:"Bienvenida de nuevo", li_title:"Hola otra vez 💛", li_sub:"Ingresa a tu cuenta para continuar donde lo dejaste.",
+      user:"Usuario", pass:"Clave", first_time:"¿Primera vez aquí?", create_new:"Crear cuenta nueva",
+      reg_eyebrow:"Crea tu cuenta", reg_title:"¡Hola! Soy Aurora",
+      reg_sub:"Seré tu amiga, la que te acompaña y te echa una mano cada día. Cuéntame un poquito de ti para conocernos. Es rápido, y lo opcional puedes saltarlo. 💛",
+      q_name:"¿Cómo te llamas?", ph_name:"Tu nombre", q_nick:"¿Cómo quieres que te llame?", optional:"(opcional)", ph_nick:"Un apodo cariñoso",
+      q_day:"Tu día a día", opt_prefer:"Prefiero no decir", opt_home:"En casa a tiempo completo", opt_workout:"Trabajo fuera de casa", opt_workhome:"Trabajo desde casa", opt_study:"Estudio",
+      q_age:"Tu edad", age_u25:"Menos de 25", age_45:"45 o más", q_city:"Ciudad o país", ph_city:"Ej: Lima, Perú",
+      acc_note:"🔐 Crea tu acceso para guardar tus datos y volver cuando quieras:", ph_user:"Elige un usuario", ph_pass:"Crea una clave",
+      pass2:"Confirmar clave", ph_pass2:"Repite la clave", req_hint:"🔑 Mínimo 6 caracteres, con al menos una letra y un número.",
+      accept_terms:"He leído y acepto los Términos y la Política de Privacidad.", read_terms:"Leer Términos", read_privacy:"Leer Política de Privacidad",
+      reg_create:"Crear mi cuenta", reg_priv:"🔒 Tus datos son solo tuyos y privados.",
+      s2_eyebrow:"Tu familia", s2_title:"¿A quiénes cuidas cada día?", s2_sub:"Agrega a tus hijos. Después podrás llenar la ficha de cada uno (colegio, pediatra, cumpleaños, y más).",
+      name:"Nombre", ph_child:"Ej: Daniela", years:"Años", months:"Meses", add:"Agregar", continue:"Continuar", s2_hint:"Puedes agregar los que quieras.",
+      home_link:"← Ir al inicio"
+    };
+    var en={
+      logout:"Log out", reset:"Start over",
+      tab_hoy:"Today", tab_dev:"Grow", tab_club:"Club", tab_docs:"Specialists", tab_rincon:"My Corner", tab_fam:"Family",
+      wc_eyebrow:"Your friend & assistant", wc_title:"You don't have to carry it all alone.",
+      wc_sub:"Aurora helps you with everything about your kids, gives advice for their age, and reminds you how much you're worth. 💛",
+      wc_p1:"Advice for every stage of your kids", wc_p2:"Verified specialists in one tap",
+      wc_p3:"A moms' club that gets you", wc_p4:"A space just for you",
+      wc_start:"Get started", have_account:"Already have an account?", login_btn:"Log in", terms:"Terms", privacy:"Privacy",
+      li_eyebrow:"Welcome back", li_title:"Hello again 💛", li_sub:"Log in to pick up where you left off.",
+      user:"Username", pass:"Password", first_time:"First time here?", create_new:"Create new account",
+      reg_eyebrow:"Create your account", reg_title:"Hi! I'm Aurora",
+      reg_sub:"I'll be your friend, by your side every day. Tell me a little about you so we get to know each other. It's quick, and you can skip anything optional. 💛",
+      q_name:"What's your name?", ph_name:"Your name", q_nick:"What should I call you?", optional:"(optional)", ph_nick:"A sweet nickname",
+      q_day:"Your everyday life", opt_prefer:"Prefer not to say", opt_home:"Full-time at home", opt_workout:"I work outside home", opt_workhome:"I work from home", opt_study:"I study",
+      q_age:"Your age", age_u25:"Under 25", age_45:"45 or older", q_city:"City or country", ph_city:"e.g. Lima, Peru",
+      acc_note:"🔐 Create your login to save your data and come back anytime:", ph_user:"Choose a username", ph_pass:"Create a password",
+      pass2:"Confirm password", ph_pass2:"Repeat the password", req_hint:"🔑 At least 6 characters, with one letter and one number.",
+      accept_terms:"I have read and accept the Terms and Privacy Policy.", read_terms:"Read Terms", read_privacy:"Read Privacy Policy",
+      reg_create:"Create my account", reg_priv:"🔒 Your data is only yours and private.",
+      s2_eyebrow:"Your family", s2_title:"Who do you care for each day?", s2_sub:"Add your kids. Later you can complete each one's profile (school, pediatrician, birthday, and more).",
+      name:"Name", ph_child:"e.g. Daniela", years:"Years", months:"Months", add:"Add", continue:"Continue", s2_hint:"You can add as many as you want.",
+      home_link:"← Back to home"
+    };
+    T.es=es; T.en=en;
+  })();
+  function applyI18n(){
+    var lang=(state.lang==="en")?"en":"es";
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n]"), function(e){ var k=e.getAttribute("data-i18n"); var v=T[lang][k]; if(v!=null) e.textContent=v; });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n-ph]"), function(e){ var k=e.getAttribute("data-i18n-ph"); var v=T[lang][k]; if(v!=null) e.setAttribute("placeholder",v); });
+    Array.prototype.forEach.call(document.querySelectorAll(".langseg"), function(b){ b.classList.toggle("on", b.getAttribute("data-lang")===lang); });
+    document.documentElement.setAttribute("lang", lang);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".langseg"), function(b){
+    b.addEventListener("click", function(){ state.lang=b.getAttribute("data-lang"); save(); applyI18n(); });
+  });
+
+  /* ---------------- Panel de administración (equipo Aurora) ---------------- */
+  function showAdmin(){
+    el("welcome").hidden=true; el("login").hidden=true; el("step1").hidden=true; el("step2").hidden=true; el("step3").hidden=true; el("admin").hidden=false;
+    el("dots").hidden=true; el("logout").hidden=true; el("tabbar").hidden=true; renderAdmin();
+  }
+  function renderAdmin(){
+    var s=state.solicitudes||[];
+    var pend=s.filter(function(x){return x.estado==="pendiente";}).length;
+    var apr=s.filter(function(x){return x.estado==="aprobada";}).length;
+    el("admin").innerHTML='<div class="card admin-card"><div class="admin-head"><b>Panel de Aurora · Equipo</b><button class="linklike" id="admBack">← Salir</button></div>'+
+      '<h2 class="title" style="margin-top:12px">Solicitudes de especialistas</h2>'+
+      '<p class="sub">Revisa credenciales y documentos, y aprueba o rechaza. <b>'+pend+'</b> pendiente(s) · <b>'+apr+'</b> aprobado(s).</p>'+
+      '<div id="admList"></div>'+
+      '<p class="hint">🔒 Vista solo para el equipo de Aurora. En la versión real, los documentos se guardan cifrados y con acceso restringido.</p></div>';
+    el("admBack").addEventListener("click", showWelcome);
+    renderAdmList();
+  }
+  function renderAdmList(){
+    var box=el("admList"); box.innerHTML=""; var s=state.solicitudes||[];
+    if(!s.length){ box.innerHTML='<div class="empty">No hay solicitudes por ahora.</div>'; return; }
+    s.slice().sort(function(a,b){ return (a.estado==="pendiente"?0:1)-(b.estado==="pendiente"?0:1); }).forEach(function(sol){
+      var c=document.createElement("div"); c.className="adm-card adm-"+sol.estado;
+      var badge=sol.estado==="pendiente"?'<span class="adm-badge pend">⏳ Pendiente</span>':sol.estado==="aprobada"?'<span class="adm-badge apr">✓ Aprobada</span>':'<span class="adm-badge rej">✕ Rechazada</span>';
+      var docsList=(sol.docs&&sol.docs.length)?sol.docs.map(function(d){return '<li>'+esc(d)+'</li>';}).join(''):'<li>—</li>';
+      c.innerHTML='<div class="adm-top"><div><b></b><span class="adm-esp"></span></div>'+badge+'</div>'+
+        '<div class="adm-grid"><div><span class="adm-l">Colegiatura</span><span class="adm-v ncol"></span></div>'+
+        '<div><span class="adm-l">Ciudad</span><span class="adm-v nlug"></span></div>'+
+        '<div><span class="adm-l">Experiencia</span><span class="adm-v nexp"></span></div>'+
+        '<div><span class="adm-l">Modalidad</span><span class="adm-v nmod"></span></div></div>'+
+        '<p class="adm-bio"></p>'+
+        '<div class="adm-docs"><span class="adm-l">Documentos presentados</span><ul>'+docsList+'</ul></div>'+
+        '<div class="adm-contact"><span class="adm-l">Contacto</span> <span class="adm-v ncont"></span></div>'+
+        (sol.estado==="pendiente"?'<div class="adm-actions"><button class="btn adm-rej">Rechazar</button><button class="btn adm-apr">Aprobar ✓</button></div>':'');
+      c.querySelector("b").textContent=sol.nombre;
+      c.querySelector(".adm-esp").textContent=sol.esp;
+      c.querySelector(".ncol").textContent=sol.col||"—";
+      c.querySelector(".nlug").textContent=sol.lugar||"—";
+      c.querySelector(".nexp").textContent=(sol.exp?sol.exp+" años":"—");
+      c.querySelector(".nmod").textContent=sol.mod||"—";
+      c.querySelector(".adm-bio").textContent=sol.bio||"";
+      c.querySelector(".ncont").textContent=(sol.email||"")+(sol.tel?" · "+sol.tel:"");
+      if(sol.estado==="pendiente"){
+        c.querySelector(".adm-apr").addEventListener("click", function(){ aprobarSol(sol); });
+        c.querySelector(".adm-rej").addEventListener("click", function(){ sol.estado="rechazada"; save(); renderAdmin(); });
+      }
+      box.appendChild(c);
+    });
+  }
+  function aprobarSol(sol){
+    sol.estado="aprobada";
+    var espObj=ESP.filter(function(e){return e.n===sol.esp;})[0];
+    state.aprobados.push({ nombre:sol.nombre, k:espObj?espObj.k:"general", ciudad:(sol.lugar?sol.lugar.split(",")[0].trim():"—"), estrellas:5, bio:sol.bio||"Especialista verificado por Aurora." });
+    save(); renderAdmin();
+  }
+  var ADMIN_PASS=null;
+
+  function renderKids(){ var box=el("kidlist"); box.innerHTML="";
+    if(!state.hijos.length){ box.innerHTML='<div class="empty">Aún no agregaste a nadie.</div>'; return; }
+    state.hijos.forEach(function(k,i){ var d=document.createElement("div"); d.className="kid";
+      d.innerHTML='<span class="em">'+emoji(k)+'</span><div class="info"><b></b><span></span></div><button class="del" aria-label="Quitar">✕</button>';
+      d.querySelector("b").textContent=k.nombre; d.querySelector(".info span").textContent=edadTxt(k);
+      d.querySelector(".del").addEventListener("click", function(){ state.hijos.splice(i,1); save(); renderKids(); }); box.appendChild(d); });
+  }
+  function addKid(){ var n=el("kname").value.trim(), a=el("kanos").value.trim(), mo=el("kmeses").value.trim(); if(!n){ el("kname").focus(); return; }
+    state.hijos.push({ id:uid(), nombre:n, anos:(a===""?"":Number(a)), meses:(mo===""?"":Number(mo)), sexo:"", rol:"Hijo/a", cumple:"", colegio:"", tutorNom:"", tutorTel:"", pedNom:"", pedTel:"", alim:[], notas:"" });
+    save(); el("kname").value=""; el("kanos").value=""; el("kmeses").value=""; el("kname").focus(); renderKids(); }
+  el("addkid").addEventListener("click", addKid);
+  ["kname","kanos","kmeses"].forEach(function(id){ el(id).addEventListener("keydown", function(e){ if(e.key==="Enter") addKid(); }); });
+  el("go2").addEventListener("click", function(){ if(!state.hijos.length){ addKid(); if(!state.hijos.length) return; } showStep(3); });
+
+  /* ---------------- HOY ---------------- */
+  function goodMorning(){
+    var names=state.hijos.filter(esKid).map(function(k){ return k.nombre; });
+    var list=names.length>1?names.slice(0,-1).join(", ")+" y "+names[names.length-1]:(names[0]||"tu familia");
+    var extra=""; var b=birthdayToday(); if(b) extra+=" 🎂 Hoy cumple <b>"+esc(b)+"</b>, ¡no lo olvides!";
+    var ne=nextEvent(); if(ne) extra+=" 📅 Pronto: "+esc(ne.texto)+" ("+fmt(ne.fecha)+(ne.hora?", "+esc(hora12(ne.hora)):"")+").";
+    return "¡Buenos días, <b>"+esc(displayName())+"</b>! Hoy te acompaño con "+esc(list)+"."+extra+" 💛<br><br>✨ <i>"+esc(motivador())+"</i>";
+  }
+  function renderHoy(){
+    el("view").innerHTML=
+      '<h2 class="hello">¡Hola, <span class="n">'+esc(displayName())+'</span>! 💛</h2>'+
+      '<div class="bubbles"><div class="lbl">'+ICO.sun+' Tu buenos días</div><div class="bub" id="gm"></div></div>'+
+      '<button class="ask-card" id="askAurora">'+ICO.chat+'<div class="ask-tx"><b>Pregúntale a Aurora</b><span>Tu amiga sabia, cuando la necesites</span></div><span class="ask-arrow">→</span></button>'+
+      '<div class="sabias"><div class="sl">'+ICO.bulb+' ¿Sabías que…?</div><p id="sabiasTxt"></p><span class="sfoot">Un dato nuevo cada día</span></div>'+
+      '<div class="sec"><div class="sec-h"><h3>'+ICO.cal+' Citas y eventos</h3></div>'+
+        '<div class="addbar">'+
+          '<div class="ev-f evdate"><label for="evDate">Día</label><input type="date" id="evDate"></div>'+
+          '<div class="ev-f evtime"><label for="evTime">Hora 🕐</label><input type="time" id="evTime"></div>'+
+          '<div class="ev-f evtext"><label for="evText">¿Qué es?</label><input type="text" id="evText" placeholder="Ej: cita del pediatra"></div>'+
+          '<button class="btn small" id="addEv">Anotar</button></div>'+
+        '<ul class="items" id="events"></ul></div>';
+    el("gm").innerHTML=goodMorning();
+    el("sabiasTxt").textContent=sabias();
+    el("askAurora").addEventListener("click", renderChat);
+    el("addEv").addEventListener("click", addEv);
+    el("evText").addEventListener("keydown", function(e){ if(e.key==="Enter") addEv(); });
+    renderEvents();
+  }
+  function renderEvents(){ var ul=el("events"); if(!ul) return; ul.innerHTML="";
+    var evs=state.eventos.slice().sort(function(a,b){ return ((a.fecha||"")+(a.hora||"")).localeCompare((b.fecha||"")+(b.hora||"")); });
+    if(!evs.length){ ul.innerHTML='<div class="empty">Sin citas por ahora. Anota una arriba ☝️</div>'; return; }
+    evs.forEach(function(t){ var idx=state.eventos.indexOf(t); var li=document.createElement("li"); li.className="item"+(t.hecho?" done":"");
+      li.innerHTML='<span class="date"></span><button class="chk" aria-label="Marcar">'+(t.hecho?"✓":"")+'</button><span class="tx"></span><button class="x" aria-label="Borrar">✕</button>';
+      li.querySelector(".date").innerHTML=fmt(t.fecha,true);
+      li.querySelector(".tx").innerHTML=esc(t.texto)+(t.hora?' <span class="etime">'+esc(hora12(t.hora))+'</span>':'');
+      li.querySelector(".chk").addEventListener("click", function(){ t.hecho=!t.hecho; save(); renderEvents(); });
+      li.querySelector(".x").addEventListener("click", function(){ state.eventos.splice(idx,1); save(); renderEvents(); }); ul.appendChild(li); });
+  }
+  function addEv(){ var d=el("evDate").value, h=el("evTime").value, t=el("evText").value.trim(); if(!t){ el("evText").focus(); return; }
+    state.eventos.push({ fecha:d, hora:h, texto:t, hecho:false }); save(); el("evText").value=""; el("evDate").value=""; el("evTime").value=""; renderEvents(); }
+
+  /* ---------------- PREGÚNTALE A AURORA (chat) ---------------- */
+  var CHAT_KB=[
+    { keys:["destet","quitar el pecho","dejar la teta","dejar de lactar","quitarle el pecho"], a:"Sobre el destete 💛: no hay una única edad correcta; la OMS sugiere lactancia hasta los 2 años o más si ambos quieren. Hazlo gradual (quita una toma a la vez), ofrece más mimos y consuelo en su lugar, y elige un momento tranquilo (no durante una enfermedad o un cambio grande). No sientas culpa: tú y tu bebé marcan el ritmo. Si tienes dudas, coméntalo con tu pediatra." },
+    { keys:["duerm","sueño","no duerme","despierta","dormir"], a:"El sueño de los peques madura con el tiempo 🌙. Ayuda una rutina fija (baño, cuento, luz baja, misma hora), un ambiente oscuro y tranquilo, y evitar pantallas antes de dormir. Despertarse de noche es normal en los primeros años. Y si el cansancio te supera, pide relevo cuando puedas: descansar también es cuidar de tu familia." },
+    { keys:["rabiet","berrinch","pataleta","llora por todo","se tira al piso"], a:"Las rabietas son normales: su cerebro aún no sabe manejar emociones grandes. Lo que más ayuda es tu calma: baja a su altura, ponle nombre a lo que siente ('estás enojado porque…') y espera a que pase antes de explicar. No lo estás malcriando: le estás enseñando a calmarse, y tú eres su mejor ejemplo 💪." },
+    { keys:["fiebre","temperatura","calentura"], a:"La fiebre es una defensa del cuerpo. Mantén a tu peque hidratado, con ropa ligera, y fíjate en cómo se ve (más que en el número). ⚠️ Consulta al pediatra o a urgencias si: es un bebé menor de 3 meses, si la fiebre es muy alta o no cede, si lo notas muy decaído, le cuesta respirar, o algo te preocupa. Tu instinto de mamá importa: si sientes que algo no está bien, busca ayuda." },
+    { keys:["comer","aliment","comida","no come","sólidos","papilla","solidos"], a:"Cada niño come a su ritmo 🍎. Ofrece variedad y deja que él regule cuánto; forzar suele salir peor. Los sólidos suelen empezar cerca de los 6 meses (confírmalo con tu pediatra). Que rechace algo nuevo es normal: a veces necesita verlo muchas veces antes de aceptarlo. Comer en familia ayuda muchísimo." },
+    { keys:["lactancia","dar pecho","amamant","teta","pezón","agarre"], a:"La lactancia es un aprendizaje para las dos 💛. Busca un buen agarre (boca bien abierta, sin dolor), ofrece a demanda, y cuídate tú también (agua, comida, descanso). Si duele mucho o te sientes agotada, una asesora de lactancia puede ayudarte muchísimo. Y recuerda: alimentes como alimentes, lo estás haciendo bien." },
+    { keys:["aisla","aísla","triste","callad","no habla","encerrad","solo en su cuarto"], a:"Que un hijo se aísle o esté más callado puede ser parte de crecer, pero merece tu atención. Acércate sin presionar ni juzgar: comparte un momento juntos y escucha más de lo que hablas. Si notas tristeza que no pasa, cambios de sueño o apetito, o algo te preocupa de verdad, busca apoyo de un psicólogo. Estar disponible ya es muchísimo 💛." },
+    { keys:["adolescent","hijo grande","no me habla mi hijo","permiso","independencia"], a:"Con un adolescente, escuchar sin sermonear abre más puertas que cualquier consejo. Dale independencia con acuerdos claros, interésate por su mundo sin invadir, y mantén la puerta abierta. Aunque busque distancia, tu presencia tranquila sigue siendo su refugio 💛." },
+    { keys:["cólico","colico","llanto","llora mucho"], a:"El llanto de la tarde y los cólicos son comunes en los primeros meses y van pasando. Prueba el porteo, movimiento suave, calorcito en la pancita y un ambiente tranquilo. Si el llanto te desborda, está bien dejarlo un momento seguro en su cuna y respirar tú. No estás haciendo nada mal 💛." },
+    { keys:["autoestima","segur","confianza","timid"], a:"Su autoestima se construye en lo cotidiano: valora su esfuerzo (no solo el resultado), déjalo intentar y equivocarse, y dile seguido que lo amas y confías en él. Las palabras que le dices hoy se vuelven su voz interior de mañana 💛." },
+    { keys:["culpa","agotada","cansada","no puedo","sola","abrumada"], a:"Respira, mamá 💛. Sentirte agotada no te hace peor mamá: te hace humana, y estás cargando mucho. Pide ayuda sin culpa, elige hoy solo lo necesario, y regálate aunque sean 10 minutos para ti. Eres más fuerte de lo que crees, y lo estás haciendo mejor de lo que piensas." },
+    { keys:["pañal","dejar el pañal","controlar pipí","hacer pis","orina","control de esfínter","bacinica"], a:"Dejar el pañal suele darse entre los 2 y 3 años, cuando el niño avisa, se mantiene seco un rato y muestra interés. Hazlo sin presión ni castigo: los accidentes son parte del proceso. Celebra los logros pequeños. Si a los 4 años sigue costando mucho, coméntalo con tu pediatra." },
+    { keys:["diente","dentición","dentando","encías","le salen los dientes"], a:"La dentición puede dar molestias, babeo y ganas de morder. Ayuda un mordedor frío y masajear sus encías con tu dedo limpio. Un poco de irritabilidad es normal; la fiebre alta no suele ser solo por los dientes, así que si aparece, consúltalo con tu pediatra." },
+    { keys:["vacuna","inmuniz"], a:"Las vacunas protegen a tu hijo de enfermedades serias. Lo mejor es seguir el calendario de vacunación de tu país con tu pediatra, y llevar un registro de cada dosis. Tras una vacuna puede haber fiebre leve o molestia en la zona: suele pasar en 1 o 2 días." },
+    { keys:["celos","hermano","hermanit","nuevo bebé","llegó el bebé"], a:"Los celos entre hermanos son normales, sobre todo con un bebé nuevo. Ayuda darle al mayor momentos a solas contigo, incluirlo en el cuidado (a su nivel) y validar lo que siente sin regañar. Con tiempo y cariño, se acomodan 💛." },
+    { keys:["pantalla","celular","tablet","televisi","tele","tecnolog","videojuego"], a:"Con las pantallas, mejor acordar límites claros que prohibir de golpe. En menores de 2 años se recomienda evitarlas casi por completo; en niños mayores, tiempos definidos y contenido apropiado. Y nada reemplaza el juego libre y el tiempo contigo." },
+    { keys:["tarea","colegio","escuela","estudiar","notas","calificac","no quiere hacer la tarea"], a:"Para las tareas ayuda una rutina fija (mismo lugar y hora), sin pantallas cerca, y un ratito de juego al terminar. Acompáñalo sin hacerlas por él. Si notas mucha dificultad sostenida, vale la pena hablar con el colegio o un psicopedagogo." },
+    { keys:["resfri","gripe","tos","moco","catarro","congesti"], a:"Los resfríos son muy comunes y suelen pasar en una semana. Ayuda hidratarlo, suero fisiológico para la nariz y descanso. ⚠️ Consulta al pediatra si le cuesta respirar, la fiebre es alta o dura varios días, o si es un bebé pequeño." },
+    { keys:["diarrea","vómito","vomito","deshidrat"], a:"Con diarrea o vómitos, lo más importante es evitar la deshidratación: ofrécele líquidos en pequeñas cantidades y seguido. ⚠️ Busca al pediatra o urgencias si hay señales de deshidratación (llora sin lágrimas, poca orina, muy decaído), sangre en las heces, o no tolera nada de líquido." },
+    { keys:["estreñ","no hace popó","caca dura","estriñe","estreñimiento"], a:"Para el estreñimiento ayuda más agua, frutas, verduras y movimiento. Evita forzar. Si hay mucho dolor, sangre, o dura varios días, coméntalo con tu pediatra para descartar otras causas." },
+    { keys:["alergia","alérgic","alergic","ronchas","sarpullido","urticaria"], a:"Ante ronchas o sarpullido, observa si hubo un alimento o contacto nuevo. ⚠️ Si aparece hinchazón de labios o cara, dificultad para respirar o vómitos, es una emergencia: busca ayuda de inmediato. Para alergias frecuentes, un pediatra o alergólogo puede orientarte." },
+    { keys:["caída","caida","golpe","se cayó","se cayo","chichón","golpe en la cabeza"], a:"Tras un golpe, vigílalo unas horas. ⚠️ Busca atención si pierde el conocimiento, vomita varias veces, está muy somnoliento o irritable, tiene un chichón muy grande o algo te preocupa. Ante la duda con un golpe en la cabeza, mejor que lo revise un profesional." },
+    { keys:["no habla","habla poco","lenguaje","dice palabras","tartamud"], a:"Cada niño tiene su ritmo con el lenguaje. Ayuda hablarle mucho, leerle y nombrar las cosas del día. Señales para consultar: no balbucea al año, no dice palabras a los 18 meses, o no une palabras a los 2 años. Un pediatra o fonoaudiólogo puede evaluar si hay dudas." },
+    { keys:["no camina","gatea","camina","pararse","motor"], a:"El caminar llega a distintos tiempos (muchos entre los 12 y 18 meses). Dale espacio seguro para moverse y practicar. Si a los 18 meses no camina, o notas que pierde habilidades que ya tenía, coméntalo con tu pediatra." },
+    { keys:["miedo","pesadilla","oscuridad","monstruo","susto","no quiere dormir solo"], a:"Los miedos y pesadillas son comunes, sobre todo entre los 3 y 6 años. Valida lo que siente sin burlarte, dale seguridad (una luz tenue, su peluche), y mantén una rutina tranquila antes de dormir. Suelen ir pasando con el tiempo 💛." },
+    { keys:["pega","muerde","golpea a otros","agrede","muerde a otros"], a:"Pegar o morder a esta edad no es maldad: es no saber aún manejar la frustración. Detén la conducta con calma y firmeza ('no te dejo pegar'), nombra la emoción y muéstrale qué SÍ hacer. Tu ejemplo tranquilo es su mejor maestro." },
+    { keys:["límite","limite","disciplina","castigo","obedec","portarse mal","malcría","malcria"], a:"Los límites con amor le dan seguridad a tu hijo. Funcionan mejor las reglas pocas y claras, dichas con firmeza pero sin gritos, y las consecuencias coherentes (no castigos por rabia). Corregir sin herir: firme por fuera, cálida por dentro 💛." },
+    { keys:["pareja","esposo","marido","matrimonio","discut","relación de pareja"], a:"Tener hijos pone a prueba a la pareja. Ayuda repartir tareas de forma justa, buscar ratos a solas (aunque sean cortos), y hablar sin reproches sobre cómo se sienten los dos. Cuidar la pareja también es cuidar a los hijos." },
+    { keys:["chupón","chupete","chupo","bobo","chupete"], a:"El chupón puede calmar, y está bien usarlo los primeros meses. Lo ideal es ir retirándolo de forma gradual entre los 2 y 3 años, sin dramatizar, para cuidar sus dientes y su habla. Sin culpa: paso a paso." },
+    { keys:["primeriza","primer hijo","no sé qué hacer","recién nacido y no sé"], a:"Ser primeriza es aprender sobre la marcha, y está bien no saberlo todo 💛. Confía en tu instinto, pide ayuda cuando la necesites, y quédate con lo esencial: tu bebé necesita tu amor, tu calma y tu presencia. Lo estás haciendo mejor de lo que crees." },
+    { keys:["pubertad","regla","menstru","cambios del cuerpo","vello","desarrollo"], a:"La pubertad trae cambios en el cuerpo y en las emociones, y cada chico la vive a su ritmo. Háblalo con naturalidad y sin vergüenza, responde sus dudas con honestidad, y hazle saber que todo lo que le pasa es normal. Tu apertura le da mucha seguridad." },
+    { keys:["bullying","acoso","molestan","burlan","le pegan en el colegio"], a:"Si sospechas acoso, escúchalo sin minimizar lo que siente y hazle saber que no es su culpa. Documenta lo que pasa y habla con el colegio para actuar juntos. Si lo notas muy afectado, el apoyo de un psicólogo ayuda mucho. Tu respaldo es su mayor protección 💛." }
+  ];
+  var CHAT_FALLBACK="Gracias por contármelo 💛 Sobre ese tema puntual todavía estoy aprendiendo, pero te dejo lo que casi siempre ayuda: observa a tu hijo con calma, confía en tu instinto (rara vez se equivoca), y si es algo de salud o te preocupa de verdad, apóyate en tu pediatra o en un especialista (en la sección Especialistas tienes profesionales verificados). No estás sola en esto. ¿Quieres contarme un poco más para orientarte mejor?";
+  var CHAT_SUGG=[
+    {c:"Destete sin culpa", q:"destete"},{c:"No duerme bien", q:"no duerme"},{c:"Berrinches", q:"berrinche"},
+    {c:"¿Fiebre, qué hago?", q:"fiebre"},{c:"Alimentación", q:"no come"},{c:"Se aísla / triste", q:"se aísla"},
+    {c:"Hablar con adolescente", q:"adolescente"},{c:"Me siento agotada", q:"agotada"}
+  ];
+  function chatReply(text){ var t=(text||"").toLowerCase();
+    for(var i=0;i<CHAT_KB.length;i++){ for(var j=0;j<CHAT_KB[i].keys.length;j++){ if(t.indexOf(CHAT_KB[i].keys[j])>=0) return CHAT_KB[i].a; } }
+    return CHAT_FALLBACK; }
+  function renderChat(){
+    if(!state.chat.length){ state.chat.push({ me:false, t:"¡Hola, "+(displayName())+"! Soy Aurora 💛 Cuéntame, ¿en qué te ayudo hoy? Puedes escribirme tu duda o tocar una de las preguntas de aquí abajo." }); save(); }
+    el("view").innerHTML=
+      '<div class="viewhead"><button class="linklike" id="chatBack">← Volver</button><h2 class="vtitle" style="margin-top:8px">'+ICO.chat+' Pregúntale a Aurora</h2><p class="vsub">Pregúntame lo que quieras. Estoy para acompañarte, sin juzgarte. 💛</p></div>'+
+      '<div class="chat-chips" id="chatChips"></div>'+
+      '<div class="feed" id="chatFeed"></div>'+
+      '<div class="cbar"><input type="text" id="chatInput" placeholder="Escribe tu pregunta…"><button class="btn small" id="chatSend">Enviar</button></div>'+
+      '<p class="tip-note">Aurora te orienta con cariño; no reemplaza a un profesional. En una emergencia, acude a urgencias.</p>';
+    var chips=el("chatChips");
+    CHAT_SUGG.forEach(function(s){ var b=document.createElement("button"); b.className="club-chip"; b.type="button"; b.textContent=s.c;
+      b.addEventListener("click", function(){ chatAsk(s.c); }); chips.appendChild(b); });
+    el("chatBack").addEventListener("click", function(){ state.tab="hoy"; save(); renderTab(); });
+    el("chatSend").addEventListener("click", function(){ chatAsk(el("chatInput").value); });
+    el("chatInput").addEventListener("keydown", function(e){ if(e.key==="Enter") chatAsk(el("chatInput").value); });
+    renderChatFeed();
+  }
+  function renderChatFeed(){ var box=el("chatFeed"); if(!box) return; box.innerHTML="";
+    state.chat.forEach(function(m){ var d=document.createElement("div"); d.className="cmsg"+(m.me?" me":"");
+      if(m.me){ d.innerHTML='<div class="cbub"><span class="ct"></span></div>'; d.querySelector(".ct").textContent=m.t; }
+      else { d.innerHTML='<span class="cav">'+ICO.chat+'</span><div class="cbub"><span class="cn">Aurora</span><span class="ct"></span></div>'; d.querySelector(".ct").textContent=m.t; }
+      box.appendChild(d); });
+    box.scrollTop=box.scrollHeight;
+  }
+  function chatAsk(text){ var t=(text||"").trim(); if(!t) return;
+    state.chat.push({ me:true, t:t }); state.chat.push({ me:false, t:chatReply(t) }); save();
+    if(el("chatInput")) el("chatInput").value=""; renderChatFeed();
+  }
+
+  /* ---------------- CRECER (desarrollo) ---------------- */
+  function renderDev(){
+    var kids=state.hijos.filter(function(m){ return esKid(m)&&hasAge(m); });
+    var html='<div class="viewhead"><h2 class="vtitle">'+ICO.grow+' Cómo va creciendo</h2><p class="vsub">Qué esperar de cada hijo según su edad exacta.</p></div><div id="devlist"></div><p class="tip-note">Información general de orientación 💛 No reemplaza la opinión de tu pediatra.</p>';
+    el("view").innerHTML=html; var box=el("devlist");
+    if(!kids.length){ box.innerHTML='<div class="empty">Agrega la edad de tus hijos (en la pestaña Familia) para ver su desarrollo.</div>'; return; }
+    var day=dayIndex();
+    kids.forEach(function(m,i){ var d=devFor(m); var g=genero(m);
+      var c=document.createElement("div"); c.className="devcard";
+      var esperarLis=rotArr(d.esperar,3,day+i).map(function(x){ return "<li>"+esc(x)+"</li>"; }).join("");
+      var normalTxt=pickOne(d.normal,day+i);
+      var pediatra=(yearsOf(m)<16);
+      var alertaLis=(pediatra && d.alerta.length)?rotArr(d.alerta,2,day+i).map(function(x){ return "<li>"+esc(x)+"</li>"; }).join(""):"";
+      var tip=tipFor(m,i);
+      c.innerHTML=
+        '<div class="dhead"><span class="em">'+emoji(m)+'</span><div><b>'+esc(m.nombre)+'</b><span>'+esc(edadTxt(m))+' · etapa: '+esc(d.et)+'</span></div></div>'+
+        '<div class="dblock esperar"><div class="dl">'+ICO.spark+' Qué esperar en esta etapa</div><ul>'+esperarLis+'</ul></div>'+
+        '<div class="dblock normal"><div class="dl">'+ICO.check+' Es normal que…</div><p>'+esc(normalTxt)+'</p></div>'+
+        (alertaLis?'<div class="dblock alerta"><div class="dl">'+ICO.alert+' Consulta al pediatra si…</div><ul>'+alertaLis+'</ul></div>':'')+
+        (tip?'<div class="dtip">'+ICO.bulb+' <b>Consejo para tu '+esc(g)+':</b> '+esc(tip)+'</div>':'');
+      box.appendChild(c); });
+  }
+
+  /* ---------------- MI RINCÓN ---------------- */
+  function renderRincon(){
+    var ideas=ideasHoy();
+    var html='<div class="viewhead"><h2 class="vtitle">'+ICO.heart+' Mi Rincón</h2><p class="vsub">Un espacio solo para ti, '+esc(displayName())+'.</p></div>'+
+      '<div class="carta"><p>'+esc(carta())+'</p></div>'+
+      '<div class="versiculo"><div class="vl">'+ICO.book+' Versículo del día</div><p id="versTxt"></p><span class="vref" id="versRef"></span><div class="vint" id="versInt"></div></div>'+
+      '<div class="mood"><h3>¿Cómo te sientes hoy?</h3><div class="mood-row" id="moodRow"></div><div class="mood-resp" id="moodResp" hidden></div></div>'+
+      '<div class="sec"><div class="sec-h"><h3>'+ICO.spark+' Tip de belleza de hoy</h3></div><div class="belleza" id="belleza"></div></div>'+
+      '<div class="sec"><div class="sec-h"><h3>Un momento para ti</h3></div><ul class="ideas" id="ideas"></ul></div>';
+    el("view").innerHTML=html;
+    var v=versiculo(); el("versTxt").textContent=v.t; el("versRef").textContent=v.ref;
+    el("versInt").innerHTML='<span class="vintl">💛 Para tu día</span>'+esc(v.i);
+    var row=el("moodRow");
+    MOODS.forEach(function(mo,i){ var b=document.createElement("button"); b.className="mood-btn"+(state.mood===i?" on":""); b.type="button"; b.textContent=mo.e; b.setAttribute("aria-label","estado "+(i+1));
+      b.addEventListener("click", function(){ state.mood=i; save();
+        Array.prototype.forEach.call(row.children,function(c){ c.classList.remove("on"); }); b.classList.add("on");
+        var r=el("moodResp"); r.textContent=mo.r; r.hidden=false; });
+      row.appendChild(b); });
+    if(state.mood!=null && MOODS[state.mood]){ var r=el("moodResp"); r.textContent=MOODS[state.mood].r; r.hidden=false; }
+    el("belleza").textContent=belleza();
+    var ul=el("ideas"); ideas.forEach(function(x){ var li=document.createElement("li"); li.className="idea";
+      li.innerHTML='<span class="ic">'+x[0]+'</span><span></span>'; li.querySelector("span:last-child").textContent=x[1]; ul.appendChild(li); });
+  }
+
+  /* ---------------- CLUB DE MAMÁS (vista de ejemplo) ---------------- */
+  var SALAS=[
+    { id:"recien", nombre:"Recién nacidos", emoji:"👶", seed:[
+      { n:"Lucía", e:"👩🏻", t:"¿Alguna tiene tips para los cólicos de la tarde? Ya no sé qué hacer 🥲" },
+      { n:"Marta", e:"🧕", t:"A mí me funcionó el porteo y masajitos en la pancita. ¡Ánimo, esto pasa!" },
+      { n:"Aurora", e:"🌅", t:"El llanto de la tarde es muy común y va pasando. Lo estás haciendo muy bien, Lucía 💛" } ] },
+    { id:"sueno", nombre:"Sueño y lactancia", emoji:"🌙", seed:[
+      { n:"Caro", e:"👩🏽", t:"Llevo semanas durmiendo a ratos… ¿cuándo mejora esto? 😴" },
+      { n:"Vale", e:"👩🏼", t:"Aquí una que ya pasó por eso: mejora, te lo prometo. Un día a la vez 🤍" } ] },
+    { id:"limites", nombre:"Rabietas y límites", emoji:"🧸", seed:[
+      { n:"Andrea", e:"👩🏻", t:"Mi peque de 2 se tira al piso por todo 😅 ¿cómo manejan las rabietas?" },
+      { n:"Aurora", e:"🌅", t:"Acompañar con calma y ponerle nombre a lo que siente ayuda muchísimo. No estás sola 💛" } ] },
+    { id:"escolares", nombre:"Niños en el colegio", emoji:"🎒", seed:[
+      { n:"Elena", e:"👩🏻", t:"Mi hijo de 8 no quiere hacer las tareas 😩 ¿algún truco que les funcione?" },
+      { n:"Aurora", e:"🌅", t:"Una rutina fija y un ratito de juego después de terminar ayuda mucho. ¡Ánimo, Elena! 💛" } ] },
+    { id:"ados", nombre:"Adolescentes", emoji:"🧑", seed:[
+      { n:"Pilar", e:"🧕", t:"Mi hija de 15 casi no me habla. ¿A alguien más le pasa? 😔" },
+      { n:"Rosa", e:"👩🏾", t:"Muchísimo. Lo que me ayudó fue escuchar sin sermonear. Poco a poco se abre 🤗" } ] },
+    { id:"grandes", nombre:"Hijos ya grandes", emoji:"🎓", seed:[
+      { n:"Marta", e:"🧕", t:"Mi hija de 22 ya trabaja, pero yo sigo preocupándome por ella 😅 ¿le pasa a alguien más?" },
+      { n:"Lucía", e:"👩🏽", t:"¡A mí igual! Una nunca deja de ser mamá. Ahí estamos, acompañándolas de lejitos 🤍" } ] },
+    { id:"mama", nombre:"Mamá también importa", emoji:"💛", seed:[
+      { n:"Sofía", e:"👩🏼", t:"Hoy me di 10 minutos para mí con un café y me sentí otra persona ☕✨" },
+      { n:"Aurora", e:"🌅", t:"¡Qué bien, Sofía! Cuidarte a ti también es cuidar a tu familia. Sigan mimándose, mamás 💛" } ] }
+  ];
+  var REPLIES=[
+    { n:"Sofía", e:"👩🏼", t:"Te entiendo perfecto, a mí me pasó igual. ¡No estás sola! 💛" },
+    { n:"Aurora", e:"🌅", t:"Gracias por compartir. Aquí siempre hay una mamá dispuesta a escucharte 🤍" },
+    { n:"Rosa", e:"👩🏾", t:"Qué valiente por contarlo. Te mando un abrazo enorme 🤗" },
+    { n:"Cami", e:"👩🏽", t:"A mí me sirvió mucho hablarlo aquí. Cuéntanos cómo te va 💪" }
+  ];
+  function salaById(id){ for(var i=0;i<SALAS.length;i++) if(SALAS[i].id===id) return SALAS[i]; return SALAS[0]; }
+  function renderClubJoin(){
+    el("view").innerHTML=
+      '<div class="viewhead"><h2 class="vtitle">'+ICO.club+' Club de Mamás</h2><p class="vsub">Un espacio privado y seguro para conversar con otras mamás. Para cuidarte, el club tiene su propio registro.</p></div>'+
+      '<div class="join-card">'+
+        '<div class="field"><label for="jName">¿Cómo quieres aparecer ante las otras mamás?</label><input type="text" id="jName" placeholder="Ej: Karo, o un apodo"></div>'+
+        '<label class="chkopt joinchk"><input type="checkbox" id="jAnon"> Prefiero mantenerme anónima</label>'+
+        '<div class="field"><label for="jEmail">Correo electrónico</label><input type="email" id="jEmail" placeholder="tucorreo@ejemplo.com"></div>'+
+        '<div class="field"><label for="jTel">WhatsApp / teléfono</label><input type="tel" id="jTel" placeholder="Ej: 51987654321"></div>'+
+        '<label class="chkopt joinchk"><input type="checkbox" id="jNormas"> Acepto las normas y el código de conducta del club.</label>'+
+        '<p class="legal-inline"><button type="button" class="linklike" data-pol="conducta">Leer normas y código de conducta</button></p>'+
+        '<button class="btn" id="jSubmit">Unirme al Club 💛</button>'+
+        '<p class="join-priv">🔒 Tu correo y número son privados: solo se usan para tu seguridad y para verificar que eres una mamá real. Nunca se muestran a otras mamás, y puedes salir del club cuando quieras.</p>'+
+      '</div>';
+    el("jSubmit").addEventListener("click", function(){
+      var em=el("jEmail").value.trim(), te=el("jTel").value.trim(), nm=el("jName").value.trim(), anon=el("jAnon").checked;
+      if(!el("jNormas").checked){ alert("Para cuidar este espacio, necesitamos que aceptes las normas de respeto 💛"); return; }
+      if(!em){ alert("Necesitamos tu correo para el club (privado y seguro) 💛"); el("jEmail").focus(); return; }
+      if(!te){ alert("Necesitamos tu WhatsApp para tu seguridad en el club 💛"); el("jTel").focus(); return; }
+      state.clubProfile={ nombre:(anon?"Mamá anónima":(nm||displayName())), email:em, tel:te, anon:anon };
+      state.clubJoined=true; save(); renderClub();
+    });
+  }
+  function renderClub(){
+    if(!state.clubJoined){ renderClubJoin(); return; }
+    if(!state.clubSala) state.clubSala=SALAS[0].id;
+    var html='<div class="viewhead"><h2 class="vtitle">'+ICO.club+' Club de Mamás</h2><p class="vsub">Aquí no estás sola. Pregunta, comparte y acompáñate con otras mamás.</p></div>'+
+      '<div class="club-welcome">🛡️ <b>Un espacio seguro.</b> Nos tratamos con respeto y sin juicios. Aurora y las moderadoras cuidan este club. <button class="linklike" id="verNormas">Ver normas</button></div>'+
+      '<div class="club-normas" id="clubNormas" hidden><b>Normas del Club 💛</b><ul><li>Respeto siempre: nada de juicios ni burlas.</li><li>Es apoyo entre mamás, no reemplaza al médico.</li><li>Cuida la privacidad: lo de aquí, se queda aquí.</li><li>Cero tolerancia al odio, insultos o acoso.</li><li>Ante una crisis, busca ayuda profesional.</li></ul><span>Un equipo de moderación (junto a Aurora) cuida que sea un lugar seguro para todas.</span></div>'+
+      '<div class="club-chips" id="clubChips"></div>'+
+      '<div class="feed" id="feed"></div>'+
+      '<div class="cbar"><input type="text" id="cInput" placeholder="Escribe algo a las mamás…"><button class="btn small" id="cSend">Enviar</button></div>'+
+      '<p class="tip-note">💛 Un espacio seguro y respetuoso. Vista de ejemplo: pronto podrás conversar con mamás reales. · <button class="linklike" id="leaveClub">Salir del club</button></p>';
+    el("view").innerHTML=html;
+    el("leaveClub").addEventListener("click", function(){ if(confirm("¿Salir del Club de Mamás? Podrás volver a unirte cuando quieras.")){ state.clubJoined=false; save(); renderClub(); } });
+    renderChips(); renderFeed();
+    el("verNormas").addEventListener("click", function(){ var n=el("clubNormas"); n.hidden=!n.hidden; });
+    el("cSend").addEventListener("click", sendMsg);
+    el("cInput").addEventListener("keydown", function(e){ if(e.key==="Enter") sendMsg(); });
+  }
+  function renderChips(){
+    var box=el("clubChips"); box.innerHTML="";
+    SALAS.forEach(function(s){ var b=document.createElement("button"); b.className="club-chip"+(s.id===state.clubSala?" on":"");
+      b.type="button"; b.textContent=s.emoji+" "+s.nombre;
+      b.addEventListener("click", function(){ state.clubSala=s.id; save(); renderChips(); renderFeed(); }); box.appendChild(b); });
+  }
+  function renderFeed(){
+    var box=el("feed"); if(!box) return; box.innerHTML="";
+    var s=salaById(state.clubSala);
+    var mine=(state.club&&state.club[s.id])||[];
+    var all=s.seed.concat(mine);
+    all.forEach(function(m){ var d=document.createElement("div"); d.className="cmsg"+(m.me?" me":"");
+      if(m.me){ d.innerHTML='<div class="cbub"><span class="ct"></span></div>'; d.querySelector(".ct").textContent=m.t; }
+      else { d.innerHTML='<span class="cav">'+(m.e||"👩")+'</span><div class="cbub"><span class="cn"></span><span class="ct"></span></div>';
+        d.querySelector(".cn").textContent=m.n; d.querySelector(".ct").textContent=m.t; }
+      box.appendChild(d); });
+    box.scrollTop=box.scrollHeight;
+  }
+  function sendMsg(){
+    var v=el("cInput").value.trim(); if(!v) return;
+    var s=state.clubSala; state.club=state.club||{}; state.club[s]=state.club[s]||[];
+    state.club[s].push({ me:true, t:v });
+    var r=REPLIES[state.club[s].length % REPLIES.length];
+    state.club[s].push({ n:r.n, e:r.e, t:r.t });
+    save(); el("cInput").value=""; renderFeed();
+  }
+
+  /* ---------------- ESPECIALISTAS ---------------- */
+  var ESP=[
+    {k:"pediatra",n:"Pediatra",e:ESICO.pediatra},{k:"general",n:"Médico general",e:ESICO.general},
+    {k:"psico",n:"Psicólogo/a",e:ESICO.psico},{k:"nutri",n:"Nutricionista",e:ESICO.nutri},
+    {k:"lactancia",n:"Lactancia",e:ESICO.lactancia},{k:"gine",n:"Ginecólogo/a",e:ESICO.gine},
+    {k:"psicoped",n:"Aprendizaje",e:ESICO.psicoped},{k:"odonto",n:"Odontopediatra",e:ESICO.odonto}
+  ];
+  var DOCS=[
+    {nombre:"Dra. Ana Ríos",k:"pediatra",ciudad:"Lima",estrellas:5,bio:"Pediatra · 12 años de experiencia. Trato cálido y basado en evidencia."},
+    {nombre:"Dr. Luis Fáez",k:"general",ciudad:"Bogotá",estrellas:5,bio:"Médico general · atención familiar integral."},
+    {nombre:"Lic. Marta Solís",k:"psico",ciudad:"CDMX",estrellas:5,bio:"Psicóloga infantil y de familia · emociones y crianza."},
+    {nombre:"Lic. Karen Mora",k:"psico",ciudad:"Lima",estrellas:4,bio:"Psicóloga · adolescentes y acompañamiento a mamás."},
+    {nombre:"Lic. Sofía Peña",k:"nutri",ciudad:"Quito",estrellas:5,bio:"Nutrición materno-infantil · alimentación por edades."},
+    {nombre:"Rosa Lima (IBCLC)",k:"lactancia",ciudad:"Online",estrellas:5,bio:"Asesora de lactancia certificada · apoyo sin juicios."},
+    {nombre:"Dra. Elena Cruz",k:"gine",ciudad:"Santiago",estrellas:5,bio:"Ginecóloga · salud y bienestar de la mamá."},
+    {nombre:"Lic. Diego Sanz",k:"psicoped",ciudad:"Online",estrellas:4,bio:"Psicopedagogo · dificultades de aprendizaje escolar."}
+  ];
+  function espName(k){ for(var i=0;i<ESP.length;i++) if(ESP[i].k===k) return ESP[i]; return {n:k,e:"👩‍⚕️"}; }
+  function stars(n){ var s=""; for(var i=0;i<5;i++) s+=(i<n?"★":"☆"); return s; }
+  function renderDocs(){
+    if(!state.docFilter) state.docFilter="todos";
+    el("view").innerHTML=
+      '<div class="viewhead"><h2 class="vtitle">'+ICO.docs+' Especialistas de confianza</h2><p class="vsub">Profesionales verificados para ti y tus hijos. Cada uno pasó una revisión rigurosa antes de estar aquí.</p></div>'+
+      '<div class="club-chips" id="docChips"></div>'+
+      '<div id="docList"></div>'+
+      '<div class="join-panel"><button class="linklike" id="verUnirse">¿Eres especialista? Requisitos para unirte 👩‍⚕️</button><div class="doc-req" id="docReq" hidden></div><button class="btn" id="apOpen" style="margin-top:12px">Postular como especialista</button></div>'+
+      '<p class="tip-note">Aurora te conecta con profesionales verificados; la atención y las decisiones médicas son responsabilidad de cada especialista.</p>';
+    renderDocChips(); renderDocList();
+    el("verUnirse").addEventListener("click", function(){ var r=el("docReq"); if(r.hidden){ r.innerHTML=reqHTML(); r.hidden=false; } else r.hidden=true; });
+    el("apOpen").addEventListener("click", renderDocApply);
+  }
+  function renderDocApply(){
+    var opts=ESP.map(function(e){ return '<option>'+e.n+'</option>'; }).join('')+'<option>Otra</option>';
+    el("view").innerHTML=
+      '<div class="viewhead"><button class="linklike" id="apBack">← Volver a especialistas</button><h2 class="vtitle" style="margin-top:8px">Postular como especialista</h2><p class="vsub">Completa tu solicitud. Nuestro equipo la revisará con cuidado y te contactará.</p></div>'+
+      '<div class="join-card">'+
+        '<div class="field"><label for="apNombre">Nombre completo</label><input type="text" id="apNombre"></div>'+
+        '<div class="two"><div class="field"><label for="apEsp">Especialidad</label><select id="apEsp">'+opts+'</select></div>'+
+          '<div class="field"><label for="apExp">Años de experiencia</label><input type="number" id="apExp" min="0"></div></div>'+
+        '<div class="field"><label for="apCol">Nº de colegiatura / licencia profesional</label><input type="text" id="apCol"></div>'+
+        '<div class="field"><label for="apLugar">País y ciudad donde ejerces</label><input type="text" id="apLugar" autocomplete="off"></div>'+
+        '<div class="two"><div class="field"><label for="apEmail">Correo electrónico</label><input type="email" id="apEmail"></div>'+
+          '<div class="field"><label for="apTel">WhatsApp / teléfono</label><input type="tel" id="apTel"></div></div>'+
+        '<div class="field"><label for="apMod">Modalidad de atención</label><select id="apMod"><option>Presencial</option><option>Online</option><option>Ambas</option></select></div>'+
+        '<div class="field"><label for="apBio">Cuéntanos de ti y de tu enfoque</label><textarea id="apBio" placeholder="Tu experiencia y tu manera de atender a las familias…"></textarea></div>'+
+        '<div class="field"><label>Documentos que puedo presentar</label><div class="checks">'+
+          '<label class="chkopt"><input type="checkbox" class="apDoc"> Título profesional</label>'+
+          '<label class="chkopt"><input type="checkbox" class="apDoc"> Colegiatura vigente</label>'+
+          '<label class="chkopt"><input type="checkbox" class="apDoc"> Certificado de especialidad</label>'+
+          '<label class="chkopt"><input type="checkbox" class="apDoc"> Documento de identidad</label>'+
+        '</div></div>'+
+        '<div class="field"><label>Declaraciones (obligatorias)</label>'+
+          '<label class="chkopt joinchk"><input type="checkbox" class="apDecl"> Declaro no tener sanciones ni denuncias vigentes.</label>'+
+          '<label class="chkopt joinchk"><input type="checkbox" class="apDecl"> Acepto que Aurora verifique mis credenciales.</label>'+
+          '<label class="chkopt joinchk"><input type="checkbox" class="apDecl"> Acepto el Código de Conducta de Aurora.</label>'+
+          '<label class="chkopt joinchk"><input type="checkbox" class="apDecl"> Acepto la membresía mensual si soy aprobado/a.</label>'+
+          '<p class="legal-inline"><button type="button" class="linklike" data-pol="especialistas">Leer Código de Conducta</button> · <button type="button" class="linklike" data-pol="terminos">Términos</button></p>'+
+        '</div>'+
+        '<p class="login-err" id="apErr" hidden>Completa nombre, colegiatura y correo, y acepta las 4 declaraciones.</p>'+
+        '<button class="btn" id="apSend">Enviar solicitud</button>'+
+        '<p class="join-priv">🔒 Tus documentos y datos son privados; solo se usan para verificar tu perfil.</p>'+
+      '</div>';
+    el("apBack").addEventListener("click", renderDocs);
+    el("apSend").addEventListener("click", function(){
+      var nombre=el("apNombre").value.trim(), col=el("apCol").value.trim(), email=el("apEmail").value.trim(), allDecl=true;
+      Array.prototype.forEach.call(document.querySelectorAll(".apDecl"), function(c){ if(!c.checked) allDecl=false; });
+      if(!nombre||!col||!email||!allDecl){ el("apErr").hidden=false; return; }
+      var docs=[]; Array.prototype.forEach.call(document.querySelectorAll(".apDoc"), function(c){ if(c.checked) docs.push(c.parentNode.textContent.trim()); });
+      state.solicitudes.push({ id:"s"+Date.now(), nombre:nombre, esp:el("apEsp").value, col:col, lugar:el("apLugar").value.trim(), exp:el("apExp").value.trim(), email:email, tel:el("apTel").value.trim(), mod:el("apMod").value, bio:el("apBio").value.trim(), docs:docs, estado:"pendiente" }); save();
+      el("view").innerHTML='<div class="apply-ok"><div class="ok-ic">⏳</div><h2 class="vtitle">¡Solicitud recibida!</h2>'+
+        '<p class="vsub">Tu solicitud quedó <b>en revisión</b>. Nuestro equipo verificará tu perfil y tus credenciales, y te responderá en un <b>máximo de 24 horas</b>. En Aurora solo aceptamos a los mejores 💛</p>'+
+        '<div class="apply-status">⏳ En espera de aprobación · respuesta en hasta 24 horas</div>'+
+        '<div class="wa-preview"><span class="wl">📩 Esto te llega ahora:</span><div class="wabub">🔔 <b>Aurora:</b> Recibimos tu solicitud para ser especialista. Está en revisión; te confirmaremos en un máximo de 24 horas. ¡Gracias por querer acompañar a las mamás! 💛</div></div>'+
+        '<button class="btn" id="apDone" style="max-width:280px;margin:20px auto 0">Volver a especialistas</button></div>';
+      el("apDone").addEventListener("click", renderDocs);
+    });
+  }
+  function renderDocChips(){
+    var box=el("docChips"); box.innerHTML="";
+    var cats=[{k:"todos",n:"Todos",e:ESICO.todos}].concat(ESP);
+    cats.forEach(function(c){ var b=document.createElement("button"); b.className="club-chip"+(c.k===state.docFilter?" on":"");
+      b.type="button"; b.innerHTML=c.e+" "+esc(c.n); b.addEventListener("click", function(){ state.docFilter=c.k; save(); renderDocChips(); renderDocList(); }); box.appendChild(b); });
+  }
+  function renderDocList(){
+    var box=el("docList"); box.innerHTML="";
+    var list=DOCS.concat(state.aprobados||[]).filter(function(d){ return state.docFilter==="todos"||d.k===state.docFilter; });
+    if(!list.length){ box.innerHTML='<div class="empty">Pronto sumaremos especialistas en esta categoría.</div>'; return; }
+    list.forEach(function(d){ var e=espName(d.k); var c=document.createElement("div"); c.className="doc-card";
+      c.innerHTML='<div class="doc-top"><span class="doc-av">'+e.e+'</span><div class="doc-info"><b></b><span class="doc-esp"></span><span class="doc-stars">'+stars(d.estrellas)+' <em></em></span></div><span class="verified">✔ Verificado</span></div><p class="doc-bio"></p><button class="doc-cta">Solicitar cita</button>';
+      c.querySelector("b").textContent=d.nombre;
+      c.querySelector(".doc-esp").textContent=e.n;
+      c.querySelector(".doc-stars em").textContent=d.ciudad;
+      c.querySelector(".doc-bio").textContent=d.bio;
+      var btn=c.querySelector(".doc-cta");
+      btn.addEventListener("click", function(){
+        var box=document.createElement("div"); box.className="cita-ok";
+        box.innerHTML='✅ <b>¡Solicitud enviada!</b> '+esc(d.nombre)+' recibirá tu consulta por WhatsApp y te responderá pronto.'+
+          '<div class="wa-preview"><span class="wl">📲 Así le llega al especialista:</span><div class="wabub">🔔 <b>Aurora:</b> Tienes una nueva consulta de una mamá que quiere agendar contigo. Responde por aquí 💛</div></div>';
+        btn.parentNode.replaceChild(box, btn);
+      });
+      box.appendChild(c); });
+  }
+  function reqHTML(){
+    return '<b>Para cuidar a nuestras mamás, cada especialista pasa una verificación rigurosa antes de aparecer:</b>'+
+      '<ul><li>Título profesional + documento de identidad</li>'+
+      '<li>Colegiatura / licencia vigente y habilitada (verificada con el colegio profesional)</li>'+
+      '<li>Certificado de su especialidad</li>'+
+      '<li>Sin sanciones ni denuncias vigentes</li>'+
+      '<li>Años de experiencia y referencias comprobables</li>'+
+      '<li>Entrevista con el equipo de Aurora</li>'+
+      '<li>Firmar el Código de Conducta de Aurora (respeto, evidencia, sin publicidad engañosa)</li>'+
+      '<li>Mantener una buena valoración de las mamás</li></ul>'+
+      '<span>Aceptamos solo a los mejores. Los especialistas pagan una membresía mensual accesible para aparecer en Aurora.</span>';
+  }
+
+  /* ---------------- FAMILIA ---------------- */
+  function fichaCampos(m){ var req=["sexo","cumple","pedNom"]; var y=hasAge(m)?yearsOf(m):null;
+    if(y!==null && y<3) req.push("alim"); else if(y!==null && y<18) req.push("colegio"); return req; }
+  function fichaEstado(m){ if(m.rol!=="Hijo/a") return {done:1,total:1,faltan:[]};
+    var labels={sexo:"si es niño o niña",cumple:"cumpleaños",pedNom:"pediatra",colegio:"colegio",alim:"alimentación"};
+    var req=fichaCampos(m), done=0, faltan=[];
+    req.forEach(function(f){ var v=m[f]; var has=(f==="alim")?(v&&v.length):(v&&(""+v).trim()); if(has) done++; else faltan.push(labels[f]); });
+    return {done:done,total:req.length,faltan:faltan}; }
+  function chipCls(t,cls){ var s=chip(t); s.className="chip "+cls; return s; }
+  function renderFamilia(){
+    var incompletos=state.hijos.filter(function(m){ var e=fichaEstado(m); return e.done<e.total; }).length;
+    var nudge = incompletos ? '<div class="fam-nudge">💛 <b>Completa la ficha de cada hijo</b> para que Aurora te dé consejos y recordatorios más personalizados. '+(incompletos===1?'Falta 1 ficha por completar.':'Faltan '+incompletos+' fichas por completar.')+'</div>' : '';
+    el("view").innerHTML='<div class="viewhead"><h2 class="vtitle">'+ICO.fam+' Tu familia</h2><p class="vsub">Toca “Completar” para llenar la ficha de cada uno.</p></div>'+
+      nudge+'<div id="members"></div><button class="btn ghost" id="addMore" style="margin-top:6px">＋ Agregar integrante</button>';
+    el("addMore").addEventListener("click", function(){ var m={ id:uid(), nombre:"", anos:"", meses:"", sexo:"", rol:"Hijo/a", cumple:"", colegio:"", tutorNom:"", tutorTel:"", pedNom:"", pedTel:"", alim:[], notas:"" }; state.hijos.push(m); save(); openSheet(m.id); });
+    var box=el("members"); if(!state.hijos.length){ box.innerHTML='<div class="empty">Aún no hay nadie. Agrega un integrante abajo.</div>'; return; }
+    state.hijos.forEach(function(k){ var e=fichaEstado(k); var comp=(e.done>=e.total);
+      var c=document.createElement("div"); c.className="mcard"+(comp?"":" incompleta");
+      var row=document.createElement("div"); row.className="row";
+      row.innerHTML='<span class="em">'+emoji(k)+'</span><div class="who"><b></b><span></span></div><button class="edit'+(comp?'':' completar')+'">'+(comp?'Editar':'Completar')+'</button>';
+      row.querySelector("b").textContent=k.nombre||"(sin nombre)"; row.querySelector(".who span").textContent=edadTxt(k);
+      row.querySelector(".edit").addEventListener("click", function(){ openSheet(k.id); }); c.appendChild(row);
+      var chips=document.createElement("div"); chips.className="chips";
+      if(k.rol==="Hijo/a"){ if(comp) chips.appendChild(chipCls("✓ Ficha completa","done")); else chips.appendChild(chipCls("⚠ Faltan: "+e.faltan.join(", "),"warn")); }
+      if(k.cumple) chips.appendChild(chip("🎂 "+fmt(k.cumple)));
+      if(k.colegio) chips.appendChild(chip("🏫 "+k.colegio));
+      if(k.tutorNom) chips.appendChild(chip("👩‍🏫 "+k.tutorNom));
+      if(k.pedNom) chips.appendChild(chip("🩺 "+k.pedNom));
+      if(k.alim&&k.alim.length) chips.appendChild(chip("🍼 "+k.alim.join(", ")));
+      if(k.notas) chips.appendChild(chip("📝 "+k.notas));
+      if(k.tutorTel) chips.appendChild(waChip(k.tutorTel,"💬 Escribir al tutor","Buenas, profe. Soy la mamá de "+k.nombre+"."));
+      if(k.pedTel) chips.appendChild(waChip(k.pedTel,"💬 Escribir al doctor","Buenas doctor(a), soy la mamá de "+k.nombre+"."));
+      if(chips.children.length) c.appendChild(chips); box.appendChild(c); });
+  }
+  function chip(t){ var s=document.createElement("span"); s.className="chip"; s.textContent=t; return s; }
+  function waChip(tel,label,msg){ var a=document.createElement("a"); a.className="chip wa"; a.href="https://wa.me/"+tel.replace(/[^0-9]/g,"")+"?text="+encodeURIComponent(msg); a.target="_blank"; a.rel="noopener"; a.textContent=label; return a; }
+
+  /* ---------------- ficha (sheet) ---------------- */
+  var editingId=null;
+  function openSheet(id){ editingId=id; var m=state.hijos.filter(function(k){ return k.id===id; })[0]; if(!m) return;
+    el("sheetTitle").textContent=m.nombre?("Ficha de "+m.nombre):"Nuevo integrante";
+    el("fNombre").value=m.nombre; el("fAnos").value=(m.anos===""||m.anos==null?"":m.anos); el("fMeses").value=(m.meses===""||m.meses==null?"":m.meses);
+    el("fSexo").value=m.sexo||""; el("fRol").value=m.rol; el("fCumple").value=m.cumple; el("fColegio").value=m.colegio;
+    el("fTutorNom").value=m.tutorNom||""; el("fTutorTel").value=m.tutorTel||""; el("fPedNom").value=m.pedNom; el("fPedTel").value=m.pedTel;
+    Array.prototype.forEach.call(el("fAlim").querySelectorAll("input[type=checkbox]"), function(ch){ ch.checked=(m.alim||[]).indexOf(ch.value)>=0; });
+    el("fNotas").value=m.notas;
+    delArmed=false; if(el("fDelete")) el("fDelete").textContent="Eliminar de mi familia";
+    el("sheetBg").hidden=false; el("fNombre").focus(); }
+  function closeSheet(){ el("sheetBg").hidden=true; editingId=null; }
+  function pickContact(nameId, telId){
+    if(navigator.contacts && navigator.contacts.select){
+      navigator.contacts.select(["name","tel"], {multiple:false}).then(function(sel){
+        if(sel && sel[0]){ var c=sel[0];
+          if(c.tel && c.tel[0]) el(telId).value=c.tel[0];
+          if(nameId && c.name && c.name[0] && !el(nameId).value.trim()) el(nameId).value=c.name[0];
+        }
+      }).catch(function(){ alert("No se pudieron abrir tus contactos en esta vista de prueba. En la app final de Aurora podrás elegirlos con un toque. Por ahora, escribe el número 💛"); });
+    } else {
+      alert("Tu teléfono o navegador no permite abrir los contactos desde esta prueba. 📇\n\nEn la app final de Aurora sí podrás elegir el número directo de tus contactos. Por ahora, escríbelo a mano 💛");
+    }
+  }
+  el("pickTutor").addEventListener("click", function(){ pickContact("fTutorNom","fTutorTel"); });
+  el("pickPed").addEventListener("click", function(){ pickContact("fPedNom","fPedTel"); });
+  el("sheetClose").addEventListener("click", function(){ var m=state.hijos.filter(function(k){ return k.id===editingId; })[0];
+    if(m&&!m.nombre.trim()){ state.hijos=state.hijos.filter(function(k){ return k.id!==editingId; }); save(); } closeSheet(); renderTab(); });
+  el("sheetBg").addEventListener("click", function(e){ if(e.target===el("sheetBg")) el("sheetClose").click(); });
+  el("fSave").addEventListener("click", function(){ var m=state.hijos.filter(function(k){ return k.id===editingId; })[0]; if(!m) return closeSheet();
+    var nm=el("fNombre").value.trim(); if(!nm){ el("fNombre").focus(); return; }
+    m.nombre=nm; var ay=el("fAnos").value.trim(), am=el("fMeses").value.trim(); m.anos=(ay===""?"":Number(ay)); m.meses=(am===""?"":Number(am));
+    m.sexo=el("fSexo").value; m.rol=el("fRol").value; m.cumple=el("fCumple").value; m.colegio=el("fColegio").value.trim();
+    m.tutorNom=el("fTutorNom").value.trim(); m.tutorTel=el("fTutorTel").value.trim(); m.pedNom=el("fPedNom").value.trim(); m.pedTel=el("fPedTel").value.trim();
+    m.alim=[]; Array.prototype.forEach.call(el("fAlim").querySelectorAll("input[type=checkbox]"), function(ch){ if(ch.checked) m.alim.push(ch.value); });
+    m.notas=el("fNotas").value.trim(); save(); closeSheet(); renderTab(); });
+  var delArmed=false, delTimer=null;
+  el("fDelete").addEventListener("click", function(){
+    if(!delArmed){ delArmed=true; el("fDelete").textContent="¿Seguro? Toca de nuevo para eliminar";
+      delTimer=setTimeout(function(){ delArmed=false; el("fDelete").textContent="Eliminar de mi familia"; }, 4000); return; }
+    clearTimeout(delTimer); delArmed=false; el("fDelete").textContent="Eliminar de mi familia";
+    state.hijos=state.hijos.filter(function(k){ return k.id!==editingId; }); save(); closeSheet(); renderTab(); });
+
+  /* reset */
+
+  /* init */
+  if(state.hijos.length) renderKids();
+  showWelcome();
+  applyI18n();
+</script>
