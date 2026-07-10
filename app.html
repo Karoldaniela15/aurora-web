@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Aurora — Tu asistente (prototipo)</title>
 
 <style>
@@ -323,6 +325,49 @@
   .tab.on { color:var(--rose); } .tab.on .ti { opacity:1; transform:translateY(-1px); }
   .tab:focus-visible { outline:3px solid var(--dawn); outline-offset:2px; }
 
+  /* ---- compartir con la familia ---- */
+  .item .shr { background:none; border:none; color:var(--rose); cursor:pointer; padding:3px; display:inline-flex; align-items:center; }
+  .item .shr .ico-h { width:19px; height:19px; }
+  .taskli { list-style:none; }
+  .asig-row { display:flex; align-items:center; gap:8px; margin-top:6px; background:var(--bg-tint); border:1px solid var(--line); border-radius:11px; padding:8px 11px; font-size:.82rem; }
+  .asig-row .asig-tx { flex:1; color:var(--ink); }
+  .asig-row.asig-confirmado { background:color-mix(in srgb,var(--ok) 12%, transparent); border-color:color-mix(in srgb,var(--ok) 30%, transparent); }
+  .asig-row.asig-nadie { background:color-mix(in srgb,var(--alert) 10%, transparent); border-color:color-mix(in srgb,var(--alert) 30%, transparent); }
+  .asig-row .asig-see { background:none; border:1px solid var(--rose); color:var(--rose); border-radius:100px; font:inherit; font-size:.76rem; font-weight:650; padding:5px 11px; cursor:pointer; white-space:nowrap; }
+  .asig-row .asig-un { background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:.9rem; }
+  /* red de apoyo */
+  .red-card { background:var(--bg-elev); border:1px solid var(--line); border-radius:18px; padding:16px 16px 14px; margin-bottom:18px; box-shadow:var(--shadow); }
+  .red-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+  .red-head b { font-size:1.05rem; display:inline-flex; align-items:center; gap:7px; } .red-head b svg { width:19px; height:19px; color:var(--rose); }
+  .red-add { background:linear-gradient(140deg,var(--dawn),var(--rose)); color:#fff; border:none; border-radius:100px; font:inherit; font-size:.8rem; font-weight:650; padding:7px 13px; cursor:pointer; }
+  .red-desc { font-size:.84rem; color:var(--ink-soft); margin:0 0 12px; line-height:1.45; }
+  .red-empty { font-size:.88rem; color:var(--ink-soft); background:var(--bg-tint); border:1px dashed var(--line); border-radius:12px; padding:14px; text-align:center; }
+  .red-item { display:flex; align-items:center; gap:11px; background:var(--bg); border:1px solid var(--line); border-radius:13px; padding:10px 12px; margin-bottom:8px; }
+  .red-av { width:36px; height:36px; border-radius:50%; flex:none; display:grid; place-items:center; font-weight:700; color:#fff; background:linear-gradient(150deg,var(--dawn),var(--rose)); }
+  .red-info { flex:1; min-width:0; } .red-info b { font-size:.98rem; } .red-info span { display:block; font-size:.78rem; color:var(--ink-soft); }
+  .red-ord { font-size:.72rem; font-weight:700; color:var(--dawn); background:color-mix(in srgb,var(--dawn) 12%, transparent); border-radius:100px; padding:3px 9px; flex:none; }
+  .red-acts { display:flex; gap:4px; flex:none; }
+  .red-acts button { background:none; border:1px solid var(--line); color:var(--ink-soft); border-radius:9px; padding:4px 8px; font-size:.8rem; cursor:pointer; }
+  .fam-sec-t { font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--ink-soft); margin:2px 0 12px; }
+  /* compartir sheet */
+  .share-task { font-weight:650; background:var(--bg-tint); border:1px solid var(--line); border-radius:12px; padding:11px 13px; margin-bottom:14px; }
+  .share-opt { width:100%; display:flex; align-items:center; gap:11px; text-align:left; background:var(--bg); border:1px solid var(--line); border-radius:13px; padding:11px 12px; margin-bottom:9px; cursor:pointer; font:inherit; }
+  .share-opt:hover { border-color:var(--rose); }
+  .share-opt .so-em { width:36px; height:36px; border-radius:50%; flex:none; display:grid; place-items:center; font-weight:700; color:#fff; background:linear-gradient(150deg,var(--dawn),var(--rose)); }
+  .share-opt .so-info { flex:1; min-width:0; } .share-opt .so-info b { display:block; font-size:.98rem; } .share-opt .so-info span { font-size:.78rem; color:var(--ink-soft); }
+  .share-opt .so-order { font-size:.72rem; font-weight:700; color:var(--dawn); flex:none; }
+  .share-empty { font-size:.9rem; color:var(--ink-soft); background:var(--bg-tint); border:1px dashed var(--line); border-radius:12px; padding:16px; text-align:center; line-height:1.5; margin-bottom:14px; }
+  /* seguimiento (demo) */
+  .seg-intro { font-size:.82rem; color:var(--ink-soft); margin:-6px 0 12px; line-height:1.45; }
+  .seg-note { text-align:center; font-size:.74rem; color:var(--ink-soft); margin:4px 0; }
+  .mama-card { background:linear-gradient(150deg,var(--plum),var(--rose)); color:#fff; border-radius:14px; padding:12px 14px; font-size:.92rem; line-height:1.45; box-shadow:0 12px 26px -18px var(--rose); }
+  .mama-card .mc-l { display:block; font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; font-weight:800; opacity:.9; margin-bottom:5px; }
+  .mama-card b { font-weight:700; }
+  .seg-act { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .segbtn { flex:1 1 auto; font:inherit; font-weight:650; font-size:.9rem; padding:11px 14px; border-radius:100px; cursor:pointer; border:1px solid var(--line); background:var(--bg); color:var(--ink); }
+  .segbtn.ok { background:linear-gradient(140deg,var(--dawn),var(--rose)); color:#fff; border:none; }
+  .segbtn.no { color:var(--alert); border-color:color-mix(in srgb,var(--alert) 40%, var(--line)); }
+
   [hidden] { display:none !important; }
 </style>
 
@@ -482,6 +527,41 @@
   </div>
 </div>
 
+<!-- SHEET: RED DE APOYO -->
+<div class="sheet-bg" id="redBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="redTitle">
+    <div class="sheet-h"><h3 id="redTitle">Agregar a tu red</h3><button class="close" id="redClose" aria-label="Cerrar">✕</button></div>
+    <div class="field"><label for="rNombre">Nombre</label><input type="text" id="rNombre" placeholder="Ej: Rosa"></div>
+    <div class="field"><label for="rRol">¿Quién es? <span class="opt">(parentesco)</span></label><input type="text" id="rRol" placeholder="Ej: Papá, Abuela, Tía"></div>
+    <div class="field"><label for="rTel">WhatsApp</label><input type="tel" id="rTel" placeholder="Ej: 51987654321"></div>
+    <button type="button" class="pickbtn" id="rPick">📇 Elegir de mis contactos</button>
+    <div class="field"><label for="rAyuda">¿En qué puede ayudar? <span class="opt">(opcional)</span></label><input type="text" id="rAyuda" placeholder="Ej: recoger del colegio, emergencias"></div>
+    <button class="btn" id="redSave">Guardar</button>
+    <div class="del-member"><button id="redDel" hidden>Quitar de mi red</button></div>
+  </div>
+</div>
+
+<!-- SHEET: COMPARTIR TAREA -->
+<div class="sheet-bg" id="shareBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+    <div class="sheet-h"><h3 id="shareTitle">Compartir con la familia</h3><button class="close" id="shareClose" aria-label="Cerrar">✕</button></div>
+    <p class="seg-intro">Elige quién se encarga. Aurora le escribe y le da seguimiento hasta que esté hecho — y te avisa a ti al final. 💛</p>
+    <div class="share-task" id="shareTask"></div>
+    <div id="shareList"></div>
+    <button class="btn" id="shareGo" hidden>Crear mi red de apoyo</button>
+  </div>
+</div>
+
+<!-- SHEET: SEGUIMIENTO -->
+<div class="sheet-bg" id="segBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="segWho">
+    <div class="sheet-h"><h3 id="segWho">Seguimiento</h3><button class="close" id="segClose" aria-label="Cerrar">✕</button></div>
+    <p class="seg-intro">Así acompaña Aurora al familiar. Toca los botones para ver cómo responde — en la app real esto pasa por WhatsApp.</p>
+    <div class="feed" id="segFeed"></div>
+    <div class="seg-act" id="segAct"></div>
+  </div>
+</div>
+
 <script>
   var KEY="babypilot_demo_v1";
   var state=load()||{ mama:"", hijos:[], eventos:[], step:1, tab:"hoy", mood:null, club:{}, clubSala:"", clubJoined:false, clubProfile:null, usuario:"", clave:"" };
@@ -500,7 +580,7 @@
         cumple:k.cumple||"", colegio:k.colegio||"", tutorNom:k.tutorNom||"", tutorTel:k.tutorTel||"",
         pedNom:k.pedNom||"", pedTel:k.pedTel||"", alim:(Array.isArray(k.alim)?k.alim:(k.alim?[k.alim]:[])), notas:k.notas||"" };
     });
-    state.eventos=state.eventos||[]; if(!state.tab) state.tab="hoy"; state.club=state.club||{}; state.clubJoined=!!state.clubJoined; if(!state.lang) state.lang="es";
+    state.eventos=state.eventos||[]; if(!state.tab) state.tab="hoy"; state.club=state.club||{}; state.redApoyo=state.redApoyo||[]; state.clubJoined=!!state.clubJoined; if(!state.lang) state.lang="es";
     if(!state.solicitudes) state.solicitudes=[
       {id:"s1", nombre:"Dra. Paula Méndez", esp:"Pediatra", col:"CMP 45231", lugar:"Lima, Perú", exp:"9", email:"paula.mendez@correo.com", tel:"51987000111", mod:"Ambas", bio:"Pediatra con enfoque cálido en lactancia, sueño y primeros años.", docs:["Título profesional","Colegiatura vigente","Certificado de especialidad","Documento de identidad"], estado:"pendiente"},
       {id:"s2", nombre:"Lic. Andrés Rocha", esp:"Psicólogo/a", col:"CPsP 8891", lugar:"Bogotá, Colombia", exp:"6", email:"andres.rocha@correo.com", tel:"57310222333", mod:"Online", bio:"Psicólogo de niños y adolescentes; acompañamiento a familias.", docs:["Título profesional","Colegiatura vigente","Documento de identidad"], estado:"pendiente"}
@@ -998,12 +1078,23 @@
   function renderEvents(){ var ul=el("events"); if(!ul) return; ul.innerHTML="";
     var evs=state.eventos.slice().sort(function(a,b){ return ((a.fecha||"")+(a.hora||"")).localeCompare((b.fecha||"")+(b.hora||"")); });
     if(!evs.length){ ul.innerHTML='<div class="empty">Sin citas por ahora. Anota una arriba ☝️</div>'; return; }
-    evs.forEach(function(t){ var idx=state.eventos.indexOf(t); var li=document.createElement("li"); li.className="item"+(t.hecho?" done":"");
-      li.innerHTML='<span class="date"></span><button class="chk" aria-label="Marcar">'+(t.hecho?"✓":"")+'</button><span class="tx"></span><button class="x" aria-label="Borrar">✕</button>';
-      li.querySelector(".date").innerHTML=fmt(t.fecha,true);
-      li.querySelector(".tx").innerHTML=esc(t.texto)+(t.hora?' <span class="etime">'+esc(hora12(t.hora))+'</span>':'');
-      li.querySelector(".chk").addEventListener("click", function(){ t.hecho=!t.hecho; save(); renderEvents(); });
-      li.querySelector(".x").addEventListener("click", function(){ state.eventos.splice(idx,1); save(); renderEvents(); }); ul.appendChild(li); });
+    evs.forEach(function(t){ var idx=state.eventos.indexOf(t);
+      var li=document.createElement("li"); li.className="taskli";
+      var row=document.createElement("div"); row.className="item"+(t.hecho?" done":"");
+      row.innerHTML='<span class="date"></span><button class="chk" aria-label="Marcar">'+(t.hecho?"✓":"")+'</button><span class="tx"></span><button class="shr" aria-label="Compartir con la familia" title="Compartir con la familia">'+SVG_PEOPLE+'</button><button class="x" aria-label="Borrar">✕</button>';
+      row.querySelector(".date").innerHTML=fmt(t.fecha,true);
+      row.querySelector(".tx").innerHTML=esc(t.texto)+(t.hora?' <span class="etime">'+esc(hora12(t.hora))+'</span>':'');
+      row.querySelector(".chk").addEventListener("click", function(){ t.hecho=!t.hecho; save(); renderEvents(); });
+      row.querySelector(".shr").addEventListener("click", function(){ openShare(idx); });
+      row.querySelector(".x").addEventListener("click", function(){ state.eventos.splice(idx,1); save(); renderEvents(); });
+      li.appendChild(row);
+      if(t.asig){ var ar=document.createElement("div"); ar.className="asig-row asig-"+(t.asig.estado||"pendiente");
+        var tx=(t.asig.estado==="confirmado")?('✅ '+esc(t.asig.nombre)+' ya se encargó'):((t.asig.estado==="nadie")?'⚠ Nadie de tu red pudo esta vez':('👥 A cargo de '+esc(t.asig.nombre)+' · Aurora da seguimiento'));
+        ar.innerHTML='<span class="asig-tx">'+tx+'</span><button class="asig-see">Ver seguimiento</button><button class="asig-un" aria-label="Quitar">✕</button>';
+        ar.querySelector(".asig-see").addEventListener("click", function(){ openSeg(idx); });
+        ar.querySelector(".asig-un").addEventListener("click", function(){ delete t.asig; save(); renderEvents(); });
+        li.appendChild(ar); }
+      ul.appendChild(li); });
   }
   function addEv(){ var d=el("evDate").value, h=el("evTime").value, t=el("evText").value.trim(); if(!t){ el("evText").focus(); return; }
     state.eventos.push({ fecha:d, hora:h, texto:t, hecho:false }); save(); el("evText").value=""; el("evDate").value=""; el("evTime").value=""; renderEvents(); }
@@ -1352,8 +1443,11 @@
   function renderFamilia(){
     var incompletos=state.hijos.filter(function(m){ var e=fichaEstado(m); return e.done<e.total; }).length;
     var nudge = incompletos ? '<div class="fam-nudge">💛 <b>Completa la ficha de cada hijo</b> para que Aurora te dé consejos y recordatorios más personalizados. '+(incompletos===1?'Falta 1 ficha por completar.':'Faltan '+incompletos+' fichas por completar.')+'</div>' : '';
-    el("view").innerHTML='<div class="viewhead"><h2 class="vtitle">'+ICO.fam+' Tu familia</h2><p class="vsub">Toca “Completar” para llenar la ficha de cada uno.</p></div>'+
+    el("view").innerHTML='<div class="viewhead"><h2 class="vtitle">'+ICO.fam+' Tu familia</h2><p class="vsub">Tu red de apoyo y la ficha de cada integrante.</p></div>'+
+      '<div id="redWrap"></div>'+
+      '<div class="fam-sec-t">Fichas de tu familia</div>'+
       nudge+'<div id="members"></div><button class="btn ghost" id="addMore" style="margin-top:6px">＋ Agregar integrante</button>';
+    renderRed();
     el("addMore").addEventListener("click", function(){ var m={ id:uid(), nombre:"", anos:"", meses:"", sexo:"", rol:"Hijo/a", cumple:"", colegio:"", tutorNom:"", tutorTel:"", pedNom:"", pedTel:"", alim:[], notas:"" }; state.hijos.push(m); save(); openSheet(m.id); });
     var box=el("members"); if(!state.hijos.length){ box.innerHTML='<div class="empty">Aún no hay nadie. Agrega un integrante abajo.</div>'; return; }
     state.hijos.forEach(function(k){ var e=fichaEstado(k); var comp=(e.done>=e.total);
@@ -1421,6 +1515,119 @@
     state.hijos=state.hijos.filter(function(k){ return k.id!==editingId; }); save(); closeSheet(); renderTab(); });
 
   /* reset */
+
+  /* ---------------- Compartir con la familia (red de apoyo + seguimiento) ---------------- */
+  var SVG_PEOPLE='<svg class="ico-h" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8.5" r="2.1"/><circle cx="17" cy="8.5" r="2.1"/><path d="M3.8 18c0-2 1.4-3.3 3.2-3.3M20.2 18c0-2-1.4-3.3-3.2-3.3M9.2 19c0-1.7 1.2-2.7 2.8-2.7s2.8 1 2.8 2.7"/></svg>';
+  function contactById(id){ return state.redApoyo.filter(function(c){ return c.id===id; })[0]; }
+  function inicial(n){ n=(n||"").trim(); return n?n.charAt(0).toUpperCase():"?"; }
+
+  function renderRed(){ var w=el("redWrap"); if(!w) return; var items="";
+    state.redApoyo.forEach(function(c,i){
+      items+='<div class="red-item"><span class="red-av">'+esc(inicial(c.nombre))+'</span>'+
+        '<div class="red-info"><b>'+esc(c.nombre)+'</b><span>'+esc(c.rol||"Familiar")+(c.ayuda?' · '+esc(c.ayuda):'')+'</span></div>'+
+        '<span class="red-ord">'+(i===0?'1ª':(i+1)+'ª')+'</span>'+
+        '<div class="red-acts">'+(i>0?'<button class="red-up" data-i="'+i+'" aria-label="Hacer prioritario" title="Subir">▲</button>':'')+
+        '<button class="red-ed" data-id="'+c.id+'" aria-label="Editar">✎</button></div></div>';
+    });
+    w.innerHTML='<div class="red-card"><div class="red-head"><b>'+SVG_PEOPLE+' Tu red de apoyo</b><button class="red-add" id="redAdd">＋ Agregar</button></div>'+
+      '<p class="red-desc">Las personas que pueden ayudarte, listas para cuando lo necesites. El orden es a quién Aurora acude primero.</p>'+
+      (items||'<div class="red-empty">Aún no agregas a nadie. Toca “＋ Agregar” para empezar tu red 💛</div>')+'</div>';
+    el("redAdd").addEventListener("click", function(){ openRedSheet(null); });
+    Array.prototype.forEach.call(w.querySelectorAll(".red-ed"), function(b){ b.addEventListener("click", function(){ openRedSheet(b.getAttribute("data-id")); }); });
+    Array.prototype.forEach.call(w.querySelectorAll(".red-up"), function(b){ b.addEventListener("click", function(){ var i=Number(b.getAttribute("data-i")); var a=state.redApoyo, tmp=a[i-1]; a[i-1]=a[i]; a[i]=tmp; save(); renderRed(); }); });
+  }
+  var redEditId=null, redDelArmed=false, redDelTimer=null;
+  function openRedSheet(id){ redEditId=id; var c=id?contactById(id):null;
+    el("redTitle").textContent=c?("Editar a "+c.nombre):"Agregar a tu red";
+    el("rNombre").value=c?c.nombre:""; el("rRol").value=c?(c.rol||""):""; el("rTel").value=c?(c.tel||""):""; el("rAyuda").value=c?(c.ayuda||""):"";
+    el("redDel").hidden=!id; redDelArmed=false; el("redDel").textContent="Quitar de mi red";
+    el("redBg").hidden=false; el("rNombre").focus(); }
+  el("redClose").addEventListener("click", function(){ el("redBg").hidden=true; });
+  el("redBg").addEventListener("click", function(e){ if(e.target===el("redBg")) el("redBg").hidden=true; });
+  el("rPick").addEventListener("click", function(){ pickContact("rNombre","rTel"); });
+  el("redSave").addEventListener("click", function(){ var nm=el("rNombre").value.trim(); if(!nm){ el("rNombre").focus(); return; }
+    var rol=el("rRol").value.trim(), tel=el("rTel").value.trim(), ayuda=el("rAyuda").value.trim();
+    if(redEditId){ var c=contactById(redEditId); if(c){ c.nombre=nm; c.rol=rol; c.tel=tel; c.ayuda=ayuda; } }
+    else { state.redApoyo.push({ id:uid(), nombre:nm, rol:rol, tel:tel, ayuda:ayuda }); }
+    save(); el("redBg").hidden=true; renderRed(); });
+  el("redDel").addEventListener("click", function(){ if(!redEditId) return;
+    if(!redDelArmed){ redDelArmed=true; el("redDel").textContent="¿Seguro? Toca de nuevo"; redDelTimer=setTimeout(function(){ redDelArmed=false; el("redDel").textContent="Quitar de mi red"; },4000); return; }
+    clearTimeout(redDelTimer); redDelArmed=false; el("redDel").textContent="Quitar de mi red";
+    state.redApoyo=state.redApoyo.filter(function(c){ return c.id!==redEditId; }); save(); el("redBg").hidden=true; renderRed(); });
+
+  var shareIdx=null;
+  function openShare(idx){ var t=state.eventos[idx]; if(!t) return; shareIdx=idx;
+    el("shareTask").textContent=t.texto+(t.hora?" · "+hora12(t.hora):"");
+    var box=el("shareList"); box.innerHTML="";
+    if(!state.redApoyo.length){ box.innerHTML='<div class="share-empty">Aún no tienes tu <b>red de apoyo</b>. Créala en la pestaña Familia para repartir tareas en segundos, sin tener que pensar a quién llamar. 💛</div>'; el("shareGo").hidden=false; }
+    else { el("shareGo").hidden=true;
+      state.redApoyo.forEach(function(c,i){ var b=document.createElement("button"); b.type="button"; b.className="share-opt";
+        b.innerHTML='<span class="so-em">'+esc(inicial(c.nombre))+'</span><span class="so-info"><b>'+esc(c.nombre)+'</b><span>'+esc(c.rol||"Familiar")+(c.ayuda?' · '+esc(c.ayuda):'')+'</span></span><span class="so-order">'+(i===0?'1ª opción':(i+1)+'ª')+'</span>';
+        b.addEventListener("click", function(){ assignTask(idx, c.id); }); box.appendChild(b); }); }
+    el("shareBg").hidden=false; }
+  function assignTask(idx, cid){ var t=state.eventos[idx], c=contactById(cid); if(!t||!c) return;
+    t.asig={ nombre:c.nombre, tel:c.tel, cid:c.id, estado:"pendiente" }; save(); el("shareBg").hidden=true; renderEvents(); openSeg(idx); }
+  el("shareClose").addEventListener("click", function(){ el("shareBg").hidden=true; });
+  el("shareBg").addEventListener("click", function(e){ if(e.target===el("shareBg")) el("shareBg").hidden=true; });
+  el("shareGo").addEventListener("click", function(){ el("shareBg").hidden=true; state.tab="familia"; save(); renderTab(); });
+
+  var segCtx=null;
+  function segCur(){ return segCtx.chain[segCtx.pos]; }
+  function openSeg(idx){ var t=state.eventos[idx]; if(!t||!t.asig) return;
+    var chain=[], start=contactById(t.asig.cid);
+    if(start) chain.push(start);
+    state.redApoyo.forEach(function(c){ if(!start||c.id!==start.id) chain.push(c); });
+    if(!chain.length) chain=[{ id:t.asig.cid, nombre:t.asig.nombre, tel:t.asig.tel, rol:"" }];
+    segCtx={ idx:idx, chain:chain, pos:0, feed:[] }; var c=segCur();
+    segCtx.feed=[{ who:"aurora", text:"Hola "+esc(c.nombre)+" 👋 "+esc(displayName())+" te pidió ayuda con: <b>"+esc(t.texto)+"</b>"+(t.hora?" a las "+esc(hora12(t.hora)):"")+". ¿Puedes? 💛" }];
+    segCtx.stage="ask"; el("segBg").hidden=false; renderSeg(); }
+  function renderSeg(){ if(!segCtx) return; var t=state.eventos[segCtx.idx], c=segCur();
+    el("segWho").textContent="Seguimiento · "+c.nombre;
+    var feed=el("segFeed"); feed.innerHTML="";
+    segCtx.feed.forEach(function(m){
+      if(m.who==="note"){ var d=document.createElement("div"); d.className="seg-note"; d.textContent=m.text; feed.appendChild(d); return; }
+      if(m.who==="mama"){ var mc=document.createElement("div"); mc.className="mama-card"; mc.innerHTML='<span class="mc-l">📲 Aurora te avisa</span>'+m.text; feed.appendChild(mc); return; }
+      var row=document.createElement("div"); row.className="cmsg"+(m.who==="fam"?" me":"");
+      row.innerHTML=(m.who==="aurora"?'<span class="cav">'+ICO.chat+'</span>':'')+'<div class="cbub">'+(m.who==="aurora"?'<span class="cn">Aurora</span>':'')+'<div class="ct">'+m.text+'</div></div>';
+      feed.appendChild(row); });
+    feed.scrollTop=feed.scrollHeight;
+    var act=el("segAct"); act.innerHTML="";
+    function addBtn(label,cls,fn){ var b=document.createElement("button"); b.className="segbtn"+(cls?" "+cls:""); b.innerHTML=label; b.addEventListener("click",fn); act.appendChild(b); }
+    if(segCtx.stage==="ask"){ addBtn("👍 Sí, puedo","ok",segYes); addBtn("No puedo","no",segNo); }
+    else if(segCtx.stage==="going"){ addBtn("🚗 Ya voy en camino","ok",segGoing); }
+    else if(segCtx.stage==="there"){ addBtn("✅ Ya está","ok",segDone); }
+    else if(segCtx.stage==="offernext"){ addBtn("Sí, pídele a "+esc(segCtx.chain[segCtx.pos+1].nombre),"ok",segNext); addBtn("Lo resuelvo yo","",segClose); }
+    else { addBtn("Cerrar","",segClose); } }
+  function segYes(){ segCtx.feed.push({who:"fam",text:"Sí, yo me encargo 👍"});
+    segCtx.feed.push({who:"aurora",text:"¡Gracias! 💛 Te recuerdo cerquita de la hora."});
+    segCtx.feed.push({who:"note",text:"— cerca de la hora —"});
+    segCtx.feed.push({who:"aurora",text:"Ya casi es hora 🕐 ¿vas en camino?"});
+    segCtx.stage="going"; renderSeg(); }
+  function segGoing(){ segCtx.feed.push({who:"fam",text:"Ya voy 🚗"});
+    segCtx.feed.push({who:"aurora",text:"¡Perfecto! 🙌 Avísame cuando ya esté."});
+    segCtx.stage="there"; renderSeg(); }
+  function segDone(){ var t=state.eventos[segCtx.idx], c=segCur();
+    segCtx.feed.push({who:"fam",text:"¡Ya está! ✅"});
+    segCtx.feed.push({who:"aurora",text:"¡Gracias, "+esc(c.nombre)+"! Le aviso a "+esc(displayName())+" 💛"});
+    segCtx.feed.push({who:"mama",text:"Listo 💛 <b>"+esc(c.nombre)+"</b> ya se encargó de «"+esc(t.texto)+"». Puedes quedarte tranquila."});
+    t.asig.estado="confirmado"; t.asig.nombre=c.nombre; t.asig.cid=c.id; save(); renderEvents();
+    segCtx.stage="end"; renderSeg(); }
+  function segNo(){ var c=segCur(), t=state.eventos[segCtx.idx];
+    segCtx.feed.push({who:"fam",text:"Uy, hoy no puedo 😕"});
+    if(segCtx.pos+1 < segCtx.chain.length){ var nx=segCtx.chain[segCtx.pos+1];
+      segCtx.feed.push({who:"mama",text:"<b>"+esc(c.nombre)+"</b> no puede con «"+esc(t.texto)+"». ¿Le pido a <b>"+esc(nx.nombre)+"</b>, el siguiente en tu red?"});
+      segCtx.stage="offernext"; }
+    else { segCtx.feed.push({who:"mama",text:"Nadie de tu red puede esta vez. No te preocupes — ¿buscamos otra opción juntas? 💛"});
+      t.asig.estado="nadie"; save(); renderEvents(); segCtx.stage="end"; }
+    renderSeg(); }
+  function segNext(){ segCtx.pos++; var c=segCur(), t=state.eventos[segCtx.idx];
+    t.asig={ nombre:c.nombre, tel:c.tel, cid:c.id, estado:"pendiente" }; save(); renderEvents();
+    segCtx.feed.push({who:"note",text:"— Aurora le escribe a "+c.nombre+" —"});
+    segCtx.feed.push({who:"aurora",text:"Hola "+esc(c.nombre)+" 👋 "+esc(displayName())+" necesita ayuda con: <b>"+esc(t.texto)+"</b>"+(t.hora?" a las "+esc(hora12(t.hora)):"")+". ¿Puedes? 💛"});
+    segCtx.stage="ask"; renderSeg(); }
+  function segClose(){ el("segBg").hidden=true; segCtx=null; }
+  el("segClose").addEventListener("click", segClose);
+  el("segBg").addEventListener("click", function(e){ if(e.target===el("segBg")) segClose(); });
 
   /* init */
   if(state.hijos.length) renderKids();
