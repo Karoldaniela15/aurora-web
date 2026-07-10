@@ -368,6 +368,17 @@
   .segbtn.ok { background:linear-gradient(140deg,var(--dawn),var(--rose)); color:#fff; border:none; }
   .segbtn.no { color:var(--alert); border-color:color-mix(in srgb,var(--alert) 40%, var(--line)); }
 
+  /* mamás registradas (admin) */
+  .mama-adm { display:flex; gap:12px; align-items:flex-start; background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:13px 14px; margin-bottom:10px; }
+  .mama-adm.mama-real { border-color:color-mix(in srgb,var(--rose) 45%, var(--line)); background:color-mix(in srgb,var(--rose) 6%, var(--bg)); }
+  .ma-av { width:42px; height:42px; border-radius:50%; flex:none; display:grid; place-items:center; font-weight:700; color:#fff; font-size:1.05rem; background:linear-gradient(150deg,var(--dawn),var(--rose)); }
+  .ma-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .ma-info b { font-size:1.02rem; }
+  .ma-tag { align-self:flex-start; font-size:.66rem; font-weight:700; color:var(--rose); background:color-mix(in srgb,var(--rose) 14%, transparent); border-radius:100px; padding:2px 9px; margin:1px 0; }
+  .ma-sub { font-size:.85rem; color:var(--ink-soft); }
+  .ma-meta { font-size:.76rem; color:var(--ink-soft); }
+  .ma-kids { font-size:.82rem; color:var(--ink); margin-top:3px; }
+
   [hidden] { display:none !important; }
 </style>
 
@@ -857,7 +868,7 @@
     el("regErr").hidden=true;
     state.mama=v; state.apodo=el("apodo").value.trim(); state.situacion=el("situacion").value;
     state.edadRango=el("edadRango").value; state.lugar=el("lugar").value.trim();
-    state.usuario=u; state.clave=p;
+    state.usuario=u; state.clave=p; state.regFecha=new Date().toISOString();
     save(); renderKids(); showStep(2); });
   el("mama").addEventListener("keydown", function(e){ if(e.key==="Enter") el("go1").click(); });
   el("liBtn").addEventListener("click", function(){
@@ -987,11 +998,15 @@
     var pend=s.filter(function(x){return x.estado==="pendiente";}).length;
     var apr=s.filter(function(x){return x.estado==="aprobada";}).length;
     el("admin").innerHTML='<div class="card admin-card"><div class="admin-head"><b>Panel de Aurora · Equipo</b><button class="linklike" id="admBack">← Salir</button></div>'+
-      '<h2 class="title" style="margin-top:12px">Solicitudes de especialistas</h2>'+
+      '<h2 class="title" style="margin-top:12px">Mamás registradas</h2>'+
+      '<p class="sub">Las mamás que han creado su cuenta en Aurora. <b id="mamaCount">0</b> registrada(s).</p>'+
+      '<div id="admMamas"></div>'+
+      '<h2 class="title" style="margin-top:24px">Solicitudes de especialistas</h2>'+
       '<p class="sub">Revisa credenciales y documentos, y aprueba o rechaza. <b>'+pend+'</b> pendiente(s) · <b>'+apr+'</b> aprobado(s).</p>'+
       '<div id="admList"></div>'+
-      '<p class="hint">🔒 Vista solo para el equipo de Aurora. En la versión real, los documentos se guardan cifrados y con acceso restringido.</p></div>';
+      '<p class="hint">🔒 Vista solo para el equipo de Aurora. En la versión real, los datos de las mamás y los documentos se guardan cifrados, en un servidor con acceso restringido — aquí ves una demostración con este dispositivo + ejemplos.</p></div>';
     el("admBack").addEventListener("click", showWelcome);
+    renderMamas();
     renderAdmList();
   }
   function renderAdmList(){
@@ -1030,6 +1045,30 @@
     var espObj=ESP.filter(function(e){return e.n===sol.esp;})[0];
     state.aprobados.push({ nombre:sol.nombre, k:espObj?espObj.k:"general", ciudad:(sol.lugar?sol.lugar.split(",")[0].trim():"—"), estrellas:5, bio:sol.bio||"Especialista verificado por Aurora." });
     save(); renderAdmin();
+  }
+  var MAMAS_DEMO=[
+    { nombre:"María Fernanda", apodo:"Mafer", situacion:"Trabajo fuera de casa", edad:"35 a 44", lugar:"Lima, Perú", usuario:"mafer_lima", hijos:2, edades:["8 años","3 años"], fecha:"2026-07-08T09:12:00" },
+    { nombre:"Gabriela Ruiz", apodo:"", situacion:"En casa a tiempo completo", edad:"25 a 34", lugar:"Bogotá, Colombia", usuario:"gabi.ruiz", hijos:1, edades:["6 meses"], fecha:"2026-07-09T14:40:00" },
+    { nombre:"Carolina Méndez", apodo:"Caro", situacion:"Trabajo desde casa", edad:"35 a 44", lugar:"CDMX, México", usuario:"caromendez", hijos:3, edades:["16 años","10 años","2 años"], fecha:"2026-07-09T20:05:00" }
+  ];
+  function fmtFecha(iso){ if(!iso) return ""; try{ var d=new Date(iso); if(isNaN(d.getTime())) return iso; return d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear(); }catch(e){ return iso; } }
+  function renderMamas(){ var box=el("admMamas"); if(!box) return;
+    var list=MAMAS_DEMO.slice();
+    if(state.usuario){ list.unshift({ nombre:state.mama||displayName(), apodo:state.apodo||"", situacion:state.situacion||"", edad:state.edadRango||"", lugar:state.lugar||"", usuario:state.usuario, hijos:(state.hijos||[]).filter(esKid).length, edades:(state.hijos||[]).filter(esKid).map(function(k){ return edadTxt(k); }), fecha:state.regFecha||"", real:true }); }
+    if(el("mamaCount")) el("mamaCount").textContent=list.length;
+    box.innerHTML="";
+    list.forEach(function(m){
+      var c=document.createElement("div"); c.className="mama-adm"+(m.real?" mama-real":"");
+      var sub=[m.situacion,m.edad,m.lugar].filter(Boolean).join(" · ");
+      var kids=m.hijos?(m.hijos+" hijo(s)"+((m.edades&&m.edades.length)?": "+m.edades.join(", "):"")):"Sin hijos registrados";
+      c.innerHTML='<span class="ma-av"></span><div class="ma-info"><b></b>'+(m.real?'<span class="ma-tag">Esta cuenta</span>':'')+'<span class="ma-sub"></span><span class="ma-meta"></span><span class="ma-kids"></span></div>';
+      c.querySelector(".ma-av").textContent=inicial(m.apodo||m.nombre);
+      c.querySelector("b").textContent=(m.apodo&&m.apodo.trim())?(m.nombre+' ("'+m.apodo+'")'):m.nombre;
+      c.querySelector(".ma-sub").textContent=sub||"—";
+      c.querySelector(".ma-meta").textContent="Usuario: "+(m.usuario||"—")+(m.fecha?" · Registro: "+fmtFecha(m.fecha):"");
+      c.querySelector(".ma-kids").textContent=kids;
+      box.appendChild(c);
+    });
   }
   var ADMIN_PASS=null;
 
