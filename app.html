@@ -405,6 +405,15 @@
   .terms-chk { align-items:flex-start; border-radius:12px; padding:10px 13px; font-size:.82rem; font-weight:500; line-height:1.4; gap:9px; margin:8px 0 10px; }
   .terms-chk input { margin-top:2px; flex:none; }
 
+  /* hablar con alguien (check-in de ánimo) */
+  .mood-help { margin-top:12px; }
+  .mh-q { font-size:.92rem; color:var(--ink); margin-bottom:10px; line-height:1.45; font-weight:600; }
+  .mh-btns { display:flex; flex-direction:column; gap:8px; }
+  .mh-b { width:100%; text-align:left; font:inherit; font-size:.92rem; font-weight:600; color:var(--ink); background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:11px 14px; cursor:pointer; transition:border-color .15s; }
+  .mh-b:hover { border-color:var(--rose); }
+  .mh-b:focus-visible { outline:3px solid var(--dawn); outline-offset:2px; }
+  .mh-note { margin-top:11px; font-size:.82rem; color:var(--ink-soft); line-height:1.5; background:var(--bg-tint); border:1px solid var(--line); border-radius:11px; padding:10px 13px; }
+
   [hidden] { display:none !important; }
 </style>
 
@@ -1291,10 +1300,30 @@
     MOODS.forEach(function(mo,i){ var b=document.createElement("button"); b.className="mood-btn"+(state.mood===i?" on":""); b.type="button"; b.textContent=mo.e; b.setAttribute("aria-label","estado "+(i+1));
       b.addEventListener("click", function(){ state.mood=i; save();
         Array.prototype.forEach.call(row.children,function(c){ c.classList.remove("on"); }); b.classList.add("on");
-        var r=el("moodResp"); r.textContent=mo.r; r.hidden=false; });
+        showMoodResp(i); });
       row.appendChild(b); });
-    if(state.mood!=null && MOODS[state.mood]){ var r=el("moodResp"); r.textContent=MOODS[state.mood].r; r.hidden=false; }
+    if(state.mood!=null && MOODS[state.mood]){ showMoodResp(state.mood); }
     el("belleza").textContent=belleza();
+  }
+
+  function showMoodResp(i){ var r=el("moodResp"); if(!r) return;
+    var triste=(i===0||i===1);
+    var html='<div class="mh-msg">'+esc(MOODS[i].r)+'</div>';
+    if(triste){
+      html+='<div class="mood-help">'+
+        '<div class="mh-q">💛 ¿Quieres hablar con alguien? No tienes que pasar este día sola.</div>'+
+        '<div class="mh-btns">'+
+          '<button class="mh-b" data-go="chat">💬 Hablar con Aurora</button>'+
+          '<button class="mh-b" data-go="club">👩‍👧 El Club de mamás</button>'+
+          '<button class="mh-b" data-go="esp">🩺 Ver un especialista</button>'+
+        '</div>'+
+        '<div class="mh-note">Si la tristeza no se va, hablar con un profesional es un acto de amor por ti y por tu familia. En Aurora te acercamos ayuda de verdad. 💛</div>'+
+      '</div>';
+    }
+    r.innerHTML=html; r.hidden=false;
+    var cb=r.querySelector('[data-go="chat"]'); if(cb) cb.addEventListener("click", renderChat);
+    var lb=r.querySelector('[data-go="club"]'); if(lb) lb.addEventListener("click", function(){ state.clubSala="mama"; state.tab="club"; save(); renderTab(); });
+    var eb=r.querySelector('[data-go="esp"]'); if(eb) eb.addEventListener("click", function(){ state.tab="docs"; save(); renderTab(); });
   }
 
   /* ---------------- CLUB DE MAMÁS (vista de ejemplo) ---------------- */
