@@ -422,6 +422,16 @@
   .venc-row .venc-tx { flex:1; color:var(--ink); }
   .venc-row .venc-done { background:linear-gradient(140deg,var(--dawn),var(--rose)); color:#fff; border:none; border-radius:100px; font:inherit; font-size:.76rem; font-weight:650; padding:5px 12px; cursor:pointer; white-space:nowrap; }
 
+  /* privacidad del chat */
+  .chat-priv { margin-bottom:12px; }
+  .chat-priv.ask { background:var(--bg-tint); border:1px solid var(--line); border-radius:14px; padding:13px 14px; }
+  .cp-q { font-size:.9rem; color:var(--ink); font-weight:600; margin-bottom:10px; line-height:1.4; }
+  .cp-btns { display:flex; flex-wrap:wrap; gap:8px; }
+  .cp-b { font:inherit; font-size:.82rem; font-weight:600; color:var(--ink); background:var(--bg-elev); border:1px solid var(--line); border-radius:100px; padding:8px 13px; cursor:pointer; }
+  .cp-b:hover { border-color:var(--rose); }
+  .chat-priv.set { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.8rem; color:var(--ink-soft); background:var(--bg-tint); border:1px solid var(--line); border-radius:100px; padding:7px 8px 7px 14px; }
+  .cp-change { background:none; border:none; color:var(--rose); font:inherit; font-size:.8rem; font-weight:650; cursor:pointer; text-decoration:underline; white-space:nowrap; }
+
   [hidden] { display:none !important; }
 </style>
 
@@ -1235,18 +1245,37 @@
   function chatReply(text){ var t=(text||"").toLowerCase();
     for(var i=0;i<CHAT_KB.length;i++){ for(var j=0;j<CHAT_KB[i].keys.length;j++){ if(t.indexOf(CHAT_KB[i].keys[j])>=0) return CHAT_KB[i].a; } }
     return CHAT_FALLBACK; }
+  function hoyStr(){ return new Date().toISOString().slice(0,10); }
+  function renderChatPriv(){ var box=el("chatPriv"); if(!box) return;
+    var labels={ guardar:"se guarda", findia:"se borra al final del día", enseguida:"se borra al terminar" };
+    if(!state.chatPriv){ box.className="chat-priv ask";
+      box.innerHTML='<div class="cp-q">🔒 Antes de empezar: ¿qué hago con nuestra conversación? Tú decides. 💛</div>'+
+        '<div class="cp-btns">'+
+          '<button class="cp-b" data-p="guardar">Guardarla</button>'+
+          '<button class="cp-b" data-p="findia">Borrar al final del día</button>'+
+          '<button class="cp-b" data-p="enseguida">Borrar al terminar</button>'+
+        '</div>';
+      Array.prototype.forEach.call(box.querySelectorAll(".cp-b"), function(b){ b.addEventListener("click", function(){ state.chatPriv=b.getAttribute("data-p"); if(state.chatPriv==="findia") state.chatDia=hoyStr(); save(); renderChatPriv(); }); });
+    } else { box.className="chat-priv set";
+      box.innerHTML='<span class="cp-cur">🔒 Este chat '+labels[state.chatPriv]+'</span><button class="cp-change" type="button">Cambiar</button>';
+      box.querySelector(".cp-change").addEventListener("click", function(){ state.chatPriv=null; save(); renderChatPriv(); });
+    }
+  }
   function renderChat(){
+    if(state.chatPriv==="findia" && state.chatDia && state.chatDia!==hoyStr()){ state.chat=[]; }
     if(!state.chat.length){ state.chat.push({ me:false, t:"¡Hola, "+(displayName())+"! Soy Aurora 💛 Cuéntame, ¿en qué te ayudo hoy? Puedes escribirme tu duda o tocar una de las preguntas de aquí abajo." }); save(); }
     el("view").innerHTML=
       '<div class="viewhead"><button class="linklike" id="chatBack">← Volver</button><h2 class="vtitle" style="margin-top:8px">'+ICO.chat+' Pregúntale a Aurora</h2><p class="vsub">Pregúntame lo que quieras. Estoy para acompañarte, sin juzgarte. 💛</p></div>'+
+      '<div class="chat-priv" id="chatPriv"></div>'+
       '<div class="chat-chips" id="chatChips"></div>'+
       '<div class="feed" id="chatFeed"></div>'+
       '<div class="cbar"><input type="text" id="chatInput" placeholder="Escribe tu pregunta…"><button class="btn small" id="chatSend">Enviar</button></div>'+
       '<p class="tip-note">Aurora te orienta con cariño; no reemplaza a un profesional. En una emergencia, acude a urgencias.</p>';
+    renderChatPriv();
     var chips=el("chatChips");
     CHAT_SUGG.forEach(function(s){ var b=document.createElement("button"); b.className="club-chip"; b.type="button"; b.textContent=s.c;
       b.addEventListener("click", function(){ chatAsk(s.c); }); chips.appendChild(b); });
-    el("chatBack").addEventListener("click", function(){ state.tab="hoy"; save(); renderTab(); });
+    el("chatBack").addEventListener("click", function(){ if(state.chatPriv==="enseguida"){ state.chat=[]; save(); } state.tab="hoy"; save(); renderTab(); });
     el("chatSend").addEventListener("click", function(){ chatAsk(el("chatInput").value); });
     el("chatInput").addEventListener("keydown", function(e){ if(e.key==="Enter") chatAsk(el("chatInput").value); });
     renderChatFeed();
@@ -1259,7 +1288,7 @@
     box.scrollTop=box.scrollHeight;
   }
   function chatAsk(text){ var t=(text||"").trim(); if(!t) return;
-    state.chat.push({ me:true, t:t }); state.chat.push({ me:false, t:chatReply(t) }); save();
+    state.chat.push({ me:true, t:t }); state.chat.push({ me:false, t:chatReply(t) }); if(state.chatPriv==="findia") state.chatDia=hoyStr(); save();
     if(el("chatInput")) el("chatInput").value=""; renderChatFeed();
   }
 
