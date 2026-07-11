@@ -112,7 +112,7 @@
   textarea { resize:vertical; min-height:60px; }
   input:focus-visible, select:focus-visible, textarea:focus-visible { outline:3px solid var(--dawn); outline-offset:1px; border-color:transparent; }
   .field { margin-bottom:15px; }
-  .two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:end; }
 
   .btn { width:100%; font:inherit; font-weight:650; font-size:1.02rem; color:#fff; cursor:pointer;
     background:linear-gradient(140deg,var(--dawn),var(--rose)); border:none; border-radius:100px;
@@ -399,6 +399,12 @@
   .prog-recent li { font-size:.9rem; background:rgba(255,255,255,.15); border-radius:10px; padding:8px 11px; }
   .prog-empty { font-size:.88rem; opacity:.94; background:rgba(255,255,255,.15); border-radius:12px; padding:12px 14px; line-height:1.45; }
 
+  /* asterisco de campos obligatorios */
+  .req { color:var(--rose); font-weight:800; }
+  /* checkbox de términos (registro) — compacto y alineado, no tapa el texto de abajo */
+  .terms-chk { align-items:flex-start; border-radius:12px; padding:10px 13px; font-size:.82rem; font-weight:500; line-height:1.4; gap:9px; margin:8px 0 10px; }
+  .terms-chk input { margin-top:2px; flex:none; }
+
   [hidden] { display:none !important; }
 </style>
 
@@ -448,7 +454,7 @@
     <p class="eyebrow" data-i18n="reg_eyebrow">Crea tu cuenta</p>
     <h2 class="title" data-i18n="reg_title">¡Hola! Soy Aurora</h2>
     <p class="sub" data-i18n="reg_sub">Seré tu amiga, la que te acompaña y te echa una mano cada día. Cuéntame un poquito de ti para conocernos. Es rápido, y lo opcional puedes saltarlo. 💛</p>
-    <div class="field"><label for="mama" data-i18n="q_name">¿Cómo te llamas?</label><input type="text" id="mama" placeholder="Tu nombre" data-i18n-ph="ph_name" autocomplete="given-name"></div>
+    <div class="field"><label for="mama"><span data-i18n="q_name">¿Cómo te llamas?</span> <span class="req">*</span></label><input type="text" id="mama" placeholder="Tu nombre" data-i18n-ph="ph_name" autocomplete="given-name"></div>
     <div class="field"><label for="apodo"><span data-i18n="q_nick">¿Cómo quieres que te llame?</span> <span class="opt" data-i18n="optional">(opcional)</span></label><input type="text" id="apodo" placeholder="Un apodo cariñoso" data-i18n-ph="ph_nick"></div>
     <div class="field"><label for="situacion" data-i18n="q_day">Tu día a día</label>
       <select id="situacion"><option value="" data-i18n="opt_prefer">Prefiero no decir</option><option data-i18n="opt_home">En casa a tiempo completo</option><option data-i18n="opt_workout">Trabajo fuera de casa</option><option data-i18n="opt_workhome">Trabajo desde casa</option><option data-i18n="opt_study">Estudio</option></select></div>
@@ -458,13 +464,13 @@
       <div class="field"><label for="lugar"><span data-i18n="q_city">Ciudad o país</span> <span class="opt" data-i18n="optional">(opcional)</span></label><input type="text" id="lugar" name="ubic_libre" placeholder="Ej: Lima, Perú" data-i18n-ph="ph_city" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" data-lpignore="true" data-form-type="other"></div>
     </div>
     <div class="acc-note" data-i18n="acc_note">🔐 Crea tu acceso para guardar tus datos y volver cuando quieras:</div>
-    <div class="field"><label for="usuario" data-i18n="user">Usuario</label><input type="text" id="usuario" autocomplete="off" autocapitalize="none" placeholder="Elige un usuario" data-i18n-ph="ph_user"></div>
+    <div class="field"><label for="usuario"><span data-i18n="user">Usuario</span> <span class="req">*</span></label><input type="text" id="usuario" autocomplete="off" autocapitalize="none" placeholder="Elige un usuario" data-i18n-ph="ph_user"></div>
     <div class="two">
-      <div class="field"><label for="clave" data-i18n="pass">Clave</label><input type="password" id="clave" placeholder="Crea una clave" data-i18n-ph="ph_pass"></div>
-      <div class="field"><label for="clave2" data-i18n="pass2">Confirmar clave</label><input type="password" id="clave2" placeholder="Repite la clave" data-i18n-ph="ph_pass2"></div>
+      <div class="field"><label for="clave"><span data-i18n="pass">Clave</span> <span class="req">*</span></label><input type="password" id="clave" placeholder="Crea una clave" data-i18n-ph="ph_pass"></div>
+      <div class="field"><label for="clave2"><span data-i18n="pass2">Confirmar clave</span> <span class="req">*</span></label><input type="password" id="clave2" placeholder="Repite la clave" data-i18n-ph="ph_pass2"></div>
     </div>
     <p class="req-hint" data-i18n="req_hint">🔑 Mínimo 6 caracteres, con al menos una letra y un número.</p>
-    <label class="chkopt joinchk"><input type="checkbox" id="acceptTerms"> <span data-i18n="accept_terms">He leído y acepto los Términos y la Política de Privacidad.</span></label>
+    <label class="chkopt terms-chk"><input type="checkbox" id="acceptTerms"> <span data-i18n="accept_terms">He leído y acepto los Términos y la Política de Privacidad.</span> <span class="req">*</span></label>
     <p class="legal-inline"><button type="button" class="linklike" data-pol="terminos" data-i18n="read_terms">Leer Términos</button> · <button type="button" class="linklike" data-pol="privacidad" data-i18n="read_privacy">Leer Política de Privacidad</button></p>
     <p class="login-err" id="regErr" hidden></p>
     <button class="btn" id="go1" data-i18n="reg_create">Crear mi cuenta</button>
