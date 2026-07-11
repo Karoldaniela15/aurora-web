@@ -1274,9 +1274,9 @@
   }
   function renderChat(){
     if(state.chatPriv==="findia" && state.chatDia && state.chatDia!==hoyStr()){ state.chat=[]; }
-    if(!state.chat.length){ state.chat.push({ me:false, t:"¡Hola, "+(displayName())+"! Soy Aurora 💛 Cuéntame, ¿en qué te ayudo hoy? Puedes escribirme tu duda o tocar una de las preguntas de aquí abajo." }); save(); }
+    if(!state.chat.length){ state.chat.push({ me:false, t:"¡Hola, "+(displayName())+"! Soy Aurora 💛 Cuéntame lo que sea — una duda o lo que llevas por dentro. Este es tu espacio seguro, entre tú y yo, y nunca te voy a juzgar." }); save(); }
     el("view").innerHTML=
-      '<div class="viewhead"><button class="linklike" id="chatBack">← Volver</button><h2 class="vtitle" style="margin-top:8px">'+ICO.chat+' Pregúntale a Aurora</h2><p class="vsub">Pregúntame lo que quieras. Estoy para acompañarte, sin juzgarte. 💛</p></div>'+
+      '<div class="viewhead"><button class="linklike" id="chatBack">← Volver</button><h2 class="vtitle" style="margin-top:8px">'+ICO.chat+' Pregúntale a Aurora</h2><p class="vsub">Aquí puedes desahogarte con confianza, como con tu mejor amiga. Lo que hablemos queda entre tú y yo. 💛</p></div>'+
       '<div class="chat-priv" id="chatPriv"></div>'+
       '<div class="chat-chips" id="chatChips"></div>'+
       '<div class="feed" id="chatFeed"></div>'+
