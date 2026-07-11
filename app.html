@@ -912,17 +912,17 @@
   /* ---------------- navegación ---------------- */
   function showWelcome(){
     el("welcome").hidden=false; el("login").hidden=true; el("step1").hidden=true; el("step2").hidden=true; el("step3").hidden=true; el("admin").hidden=true;
-    el("dots").hidden=true; el("logout").hidden=true; el("tabbar").hidden=true;
+    el("dots").hidden=true; el("logout").hidden=true; el("tabbar").hidden=true; el("langToggle").hidden=false;
   }
   function showLogin(){
     el("welcome").hidden=true; el("login").hidden=false; el("step1").hidden=true; el("step2").hidden=true; el("step3").hidden=true; el("admin").hidden=true;
-    el("dots").hidden=true; el("logout").hidden=true; el("tabbar").hidden=true;
+    el("dots").hidden=true; el("logout").hidden=true; el("tabbar").hidden=true; el("langToggle").hidden=false;
     if(el("liUser")) el("liUser").value=state.usuario||""; if(el("liPass")) el("liPass").value=""; if(el("liErr")) el("liErr").hidden=true;
   }
   function showStep(n){
     state.step=n; save(); el("login").hidden=true; el("welcome").hidden=true; el("admin").hidden=true;
     el("step1").hidden=n!==1; el("step2").hidden=n!==2; el("step3").hidden=n!==3;
-    el("logout").hidden=n!==3; el("dots").hidden=n===3; el("tabbar").hidden=n!==3;
+    el("logout").hidden=n!==3; el("dots").hidden=n===3; el("tabbar").hidden=n!==3; el("langToggle").hidden=(n===3);
     var d=el("dots").children; for(var i=0;i<d.length;i++) d[i].className=(i<n)?"on":"";
     if(n===3) renderTab();
   }
@@ -1070,7 +1070,7 @@
   /* ---------------- Panel de administración (equipo Aurora) ---------------- */
   function showAdmin(){
     el("welcome").hidden=true; el("login").hidden=true; el("step1").hidden=true; el("step2").hidden=true; el("step3").hidden=true; el("admin").hidden=false;
-    el("dots").hidden=true; el("logout").hidden=true; el("tabbar").hidden=true; renderAdmin();
+    el("dots").hidden=true; el("logout").hidden=true; el("tabbar").hidden=true; el("langToggle").hidden=true; renderAdmin();
   }
   function renderAdmin(){
     var s=state.solicitudes||[];
