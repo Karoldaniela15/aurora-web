@@ -489,7 +489,7 @@
   <button class="tab" data-tab="dev"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 15c0-3-2.4-5-5.4-5 0 3 2.4 5 5.4 5z"/><path d="M12 12.5c0-2.6 2-4.5 5-4.5 0 2.6-2 4.5-5 4.5z"/></svg></span><span data-i18n="tab_dev">Crecer</span></button>
   <button class="tab" data-tab="club"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="2.5"/><circle cx="16" cy="10" r="2"/><path d="M4.5 18.5c0-2.6 2-4.2 4.5-4.2s4.5 1.6 4.5 4.2"/><path d="M15 14.4c2.2 0 3.9 1.4 3.9 3.6"/></svg></span><span data-i18n="tab_club">Club</span></button>
   <button class="tab" data-tab="docs"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="5"/><path d="M12 9v6M9 12h6"/></svg></span><span data-i18n="tab_docs">Especialistas</span></button>
-  <button class="tab" data-tab="rincon"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-6.8-4.2-6.8-9A3.5 3.5 0 0 1 12 8.2 3.5 3.5 0 0 1 18.8 11c0 4.8-6.8 9-6.8 9z"/></svg></span><span data-i18n="tab_rincon">Rincón</span></button>
+  <button class="tab" data-tab="rincon"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-6.8-4.2-6.8-9A3.5 3.5 0 0 1 12 8.2 3.5 3.5 0 0 1 18.8 11c0 4.8-6.8 9-6.8 9z"/></svg></span><span data-i18n="tab_rincon">Tú</span></button>
   <button class="tab" data-tab="familia"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8.5" r="2.1"/><circle cx="17" cy="8.5" r="2.1"/><circle cx="12" cy="13.5" r="1.7"/><path d="M3.8 18c0-2 1.4-3.3 3.2-3.3M20.2 18c0-2-1.4-3.3-3.2-3.3M9.2 19c0-1.7 1.2-2.7 2.8-2.7s2.8 1 2.8 2.7"/></svg></span><span data-i18n="tab_fam">Familia</span></button>
 </nav>
 
@@ -935,7 +935,7 @@
   (function(){
     var es={
       logout:"Cerrar sesión", reset:"Empezar de nuevo",
-      tab_hoy:"Hoy", tab_dev:"Crecer", tab_club:"Club", tab_docs:"Especialistas", tab_rincon:"Rincón", tab_fam:"Familia",
+      tab_hoy:"Hoy", tab_dev:"Crecer", tab_club:"Club", tab_docs:"Especialistas", tab_rincon:"Tú", tab_fam:"Familia",
       wc_eyebrow:"Tu amiga y asistente", wc_title:"No tienes que cargarlo todo sola.",
       wc_sub:"Aurora te acompaña con todo lo de tus hijos, te aconseja según su edad, y te recuerda cuánto vales. 💛",
       wc_p1:"Consejos para cada etapa de tus hijos", wc_p2:"Especialistas verificados a un toque",
@@ -958,7 +958,7 @@
     };
     var en={
       logout:"Log out", reset:"Start over",
-      tab_hoy:"Today", tab_dev:"Grow", tab_club:"Club", tab_docs:"Specialists", tab_rincon:"My Corner", tab_fam:"Family",
+      tab_hoy:"Today", tab_dev:"Grow", tab_club:"Club", tab_docs:"Specialists", tab_rincon:"You", tab_fam:"Family",
       wc_eyebrow:"Your friend & assistant", wc_title:"You don't have to carry it all alone.",
       wc_sub:"Aurora helps you with everything about your kids, gives advice for their age, and reminds you how much you're worth. 💛",
       wc_p1:"Advice for every stage of your kids", wc_p2:"Verified specialists in one tap",
@@ -1246,7 +1246,7 @@
   /* ---------------- MI RINCÓN ---------------- */
   function renderRincon(){
     var ideas=ideasHoy();
-    var html='<div class="viewhead"><h2 class="vtitle">'+ICO.heart+' Mi Rincón</h2><p class="vsub">Un espacio solo para ti, '+esc(displayName())+'.</p></div>'+
+    var html='<div class="viewhead"><h2 class="vtitle">'+ICO.heart+' Este espacio es tuyo</h2><p class="vsub">Un momento solo para ti, '+esc(displayName())+'. 💛</p></div>'+
       '<div class="carta"><p>'+esc(carta())+'</p></div>'+
       '<div class="versiculo"><div class="vl">'+ICO.book+' Versículo del día</div><p id="versTxt"></p><span class="vref" id="versRef"></span><div class="vint" id="versInt"></div></div>'+
       '<div class="mood"><h3>¿Cómo te sientes hoy?</h3><div class="mood-row" id="moodRow"></div><div class="mood-resp" id="moodResp" hidden></div></div>'+
