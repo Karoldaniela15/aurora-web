@@ -432,6 +432,8 @@
   .chat-priv.set { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.8rem; color:var(--ink-soft); background:var(--bg-tint); border:1px solid var(--line); border-radius:100px; padding:7px 8px 7px 14px; }
   .cp-change { background:none; border:none; color:var(--rose); font:inherit; font-size:.8rem; font-weight:650; cursor:pointer; text-decoration:underline; white-space:nowrap; }
 
+  .chip.cond { color:var(--plum); background:color-mix(in srgb,var(--plum) 12%, transparent); border-color:color-mix(in srgb,var(--plum) 32%, transparent); }
+
   [hidden] { display:none !important; }
 </style>
 
@@ -570,7 +572,16 @@
         <label class="chkopt"><input type="checkbox" value="Ya destetado/a"> Ya destetado/a</label>
         <label class="chkopt"><input type="checkbox" value="Ya come de todo"> Ya come de todo</label>
       </div></div>
-    <div class="field"><label for="fNotas">Alergias / notas importantes</label><textarea id="fNotas" placeholder="Ej: alérgico a la penicilina…"></textarea></div>
+    <div class="field"><label>¿Tiene alguna condición o necesidad especial? <span class="opt">(opcional — para que Aurora te acompañe mejor)</span></label>
+      <div class="checks" id="fCond">
+        <label class="chkopt"><input type="checkbox" value="Autismo (TEA)"> Autismo (TEA)</label>
+        <label class="chkopt"><input type="checkbox" value="TDAH"> TDAH</label>
+        <label class="chkopt"><input type="checkbox" value="Dislexia"> Dislexia</label>
+        <label class="chkopt"><input type="checkbox" value="Altas capacidades"> Altas capacidades</label>
+        <label class="chkopt"><input type="checkbox" value="Necesidad especial de salud"> Necesidad especial de salud</label>
+        <label class="chkopt"><input type="checkbox" value="Otra"> Otra</label>
+      </div></div>
+    <div class="field"><label for="fNotas">Alergias, condición o notas importantes</label><textarea id="fNotas" placeholder="Ej: alérgico a la penicilina, o detalles de su condición…"></textarea></div>
     <button class="btn" id="fSave">Guardar ficha</button>
     <div class="del-member"><button id="fDelete">Eliminar de mi familia</button></div>
   </div>
@@ -1618,6 +1629,7 @@
       if(k.tutorNom) chips.appendChild(chip("👩‍🏫 "+k.tutorNom));
       if(k.pedNom) chips.appendChild(chip("🩺 "+k.pedNom));
       if(k.alim&&k.alim.length) chips.appendChild(chip("🍼 "+k.alim.join(", ")));
+      if(k.condiciones&&k.condiciones.length) chips.appendChild(chipCls("🧩 "+k.condiciones.join(", "),"cond"));
       if(k.notas) chips.appendChild(chip("📝 "+k.notas));
       if(k.tutorTel) chips.appendChild(waChip(k.tutorTel,"💬 Escribir al tutor","Buenas, profe. Soy la mamá de "+k.nombre+"."));
       if(k.pedTel) chips.appendChild(waChip(k.pedTel,"💬 Escribir al doctor","Buenas doctor(a), soy la mamá de "+k.nombre+"."));
@@ -1634,6 +1646,7 @@
     el("fSexo").value=m.sexo||""; el("fRol").value=m.rol; el("fCumple").value=m.cumple; el("fColegio").value=m.colegio;
     el("fTutorNom").value=m.tutorNom||""; el("fTutorTel").value=m.tutorTel||""; el("fPedNom").value=m.pedNom; el("fPedTel").value=m.pedTel;
     Array.prototype.forEach.call(el("fAlim").querySelectorAll("input[type=checkbox]"), function(ch){ ch.checked=(m.alim||[]).indexOf(ch.value)>=0; });
+    Array.prototype.forEach.call(el("fCond").querySelectorAll("input[type=checkbox]"), function(ch){ ch.checked=(m.condiciones||[]).indexOf(ch.value)>=0; });
     el("fNotas").value=m.notas;
     delArmed=false; if(el("fDelete")) el("fDelete").textContent="Eliminar de mi familia";
     el("sheetBg").hidden=false; el("fNombre").focus(); }
@@ -1661,6 +1674,7 @@
     m.sexo=el("fSexo").value; m.rol=el("fRol").value; m.cumple=el("fCumple").value; m.colegio=el("fColegio").value.trim();
     m.tutorNom=el("fTutorNom").value.trim(); m.tutorTel=el("fTutorTel").value.trim(); m.pedNom=el("fPedNom").value.trim(); m.pedTel=el("fPedTel").value.trim();
     m.alim=[]; Array.prototype.forEach.call(el("fAlim").querySelectorAll("input[type=checkbox]"), function(ch){ if(ch.checked) m.alim.push(ch.value); });
+    m.condiciones=[]; Array.prototype.forEach.call(el("fCond").querySelectorAll("input[type=checkbox]"), function(ch){ if(ch.checked) m.condiciones.push(ch.value); });
     m.notas=el("fNotas").value.trim(); save(); closeSheet(); renderTab(); });
   var delArmed=false, delTimer=null;
   el("fDelete").addEventListener("click", function(){
