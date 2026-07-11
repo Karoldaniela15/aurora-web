@@ -573,7 +573,7 @@
       <div class="field"><label for="fPedTel">WhatsApp del doctor</label><input type="tel" id="fPedTel" placeholder="Ej: 51987654321"></div>
     </div>
     <button type="button" class="pickbtn" id="pickPed">📇 Elegir de mis contactos</button>
-    <div class="field"><label>¿Cómo se alimenta? <span class="opt">(bebés/niños pequeños — puedes elegir varias)</span></label>
+    <div class="field" id="fAlimField"><label>¿Cómo se alimenta? <span class="opt">(bebés/niños pequeños — puedes elegir varias)</span></label>
       <div class="checks" id="fAlim">
         <label class="chkopt"><input type="checkbox" value="Lactancia materna"> Lactancia materna</label>
         <label class="chkopt"><input type="checkbox" value="Fórmula"> Fórmula</label>
@@ -1720,7 +1720,7 @@
     Array.prototype.forEach.call(el("fCond").querySelectorAll("input[type=checkbox]"), function(ch){ ch.checked=(m.condiciones||[]).indexOf(ch.value)>=0; });
     el("fNotas").value=m.notas;
     delArmed=false; if(el("fDelete")) el("fDelete").textContent="Eliminar de mi familia";
-    el("sheetBg").hidden=false; el("fNombre").focus(); }
+    toggleAlim(); el("sheetBg").hidden=false; el("fNombre").focus(); }
   function closeSheet(){ el("sheetBg").hidden=true; editingId=null; }
   function pickContact(nameId, telId){
     if(navigator.contacts && navigator.contacts.select){
@@ -1734,6 +1734,8 @@
       alert("Tu teléfono o navegador no permite abrir los contactos desde esta prueba. 📇\n\nEn la app final de Aurora sí podrás elegir el número directo de tus contactos. Por ahora, escríbelo a mano 💛");
     }
   }
+  function toggleAlim(){ var v=el("fAnos").value; var a=(v===""?null:Number(v)); var hide=(a!=null&&a>5); var f=el("fAlimField"); if(f) f.style.display=hide?"none":""; }
+  el("fAnos").addEventListener("input", toggleAlim);
   el("pickTutor").addEventListener("click", function(){ pickContact("fTutorNom","fTutorTel"); });
   el("pickPed").addEventListener("click", function(){ pickContact("fPedNom","fPedTel"); });
   el("sheetClose").addEventListener("click", function(){ var m=state.hijos.filter(function(k){ return k.id===editingId; })[0];
@@ -1744,7 +1746,7 @@
     m.nombre=nm; var ay=el("fAnos").value.trim(), am=el("fMeses").value.trim(); m.anos=(ay===""?"":Number(ay)); m.meses=(am===""?"":Number(am));
     m.sexo=el("fSexo").value; m.rol=el("fRol").value; m.cumple=el("fCumple").value; m.colegio=el("fColegio").value.trim();
     m.tutorNom=el("fTutorNom").value.trim(); m.tutorTel=el("fTutorTel").value.trim(); m.pedNom=el("fPedNom").value.trim(); m.pedTel=el("fPedTel").value.trim();
-    m.alim=[]; Array.prototype.forEach.call(el("fAlim").querySelectorAll("input[type=checkbox]"), function(ch){ if(ch.checked) m.alim.push(ch.value); });
+    m.alim=[]; if(!(m.anos!==""&&m.anos!=null&&Number(m.anos)>5)){ Array.prototype.forEach.call(el("fAlim").querySelectorAll("input[type=checkbox]"), function(ch){ if(ch.checked) m.alim.push(ch.value); }); }
     m.condiciones=[]; Array.prototype.forEach.call(el("fCond").querySelectorAll("input[type=checkbox]"), function(ch){ if(ch.checked) m.condiciones.push(ch.value); });
     m.notas=el("fNotas").value.trim(); save(); closeSheet(); renderTab(); });
   var delArmed=false, delTimer=null;
