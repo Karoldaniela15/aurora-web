@@ -383,6 +383,22 @@
   .ma-meta { font-size:.76rem; color:var(--ink-soft); }
   .ma-kids { font-size:.82rem; color:var(--ink); margin-top:3px; }
 
+  /* progreso — todo lo que haces (espacio Tú) */
+  .prog { background:linear-gradient(155deg, var(--plum), var(--rose)); color:#fff; border-radius:20px; padding:20px; margin-bottom:22px; box-shadow:0 18px 36px -22px var(--rose); }
+  .prog .pl { font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; font-weight:800; opacity:.94; margin-bottom:6px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .prog .pl svg { width:16px; height:16px; }
+  .pbadge { font-size:.62rem; letter-spacing:.04em; font-weight:800; background:rgba(255,255,255,.22); border-radius:100px; padding:2px 9px; }
+  .prog .pintro { font-size:.95rem; opacity:.95; margin:0 0 16px; line-height:1.45; }
+  .prog-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .pstat { background:rgba(255,255,255,.15); border-radius:14px; padding:12px 6px; text-align:center; }
+  .pstat .pn { font-size:1.8rem; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; }
+  .pstat .pc { font-size:.7rem; opacity:.92; margin-top:5px; line-height:1.2; }
+  .prog-recent { margin-top:16px; }
+  .prog-recent .prl { font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; font-weight:700; opacity:.85; margin-bottom:8px; }
+  .prog-recent ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .prog-recent li { font-size:.9rem; background:rgba(255,255,255,.15); border-radius:10px; padding:8px 11px; }
+  .prog-empty { font-size:.88rem; opacity:.94; background:rgba(255,255,255,.15); border-radius:12px; padding:12px 14px; line-height:1.45; }
+
   [hidden] { display:none !important; }
 </style>
 
@@ -1133,7 +1149,7 @@
       row.innerHTML='<span class="date"></span><button class="chk" aria-label="Marcar">'+(t.hecho?"✓":"")+'</button><span class="tx"></span><button class="shr" aria-label="Compartir con la familia" title="Compartir con la familia">'+SVG_PEOPLE+'</button><button class="x" aria-label="Borrar">✕</button>';
       row.querySelector(".date").innerHTML=fmt(t.fecha,true);
       row.querySelector(".tx").innerHTML=esc(t.texto)+(t.hora?' <span class="etime">'+esc(hora12(t.hora))+'</span>':'');
-      row.querySelector(".chk").addEventListener("click", function(){ t.hecho=!t.hecho; save(); renderEvents(); });
+      row.querySelector(".chk").addEventListener("click", function(){ t.hecho=!t.hecho; if(t.hecho){ t.hechoFecha=new Date().toISOString(); } else { delete t.hechoFecha; } save(); renderEvents(); });
       row.querySelector(".shr").addEventListener("click", function(){ openShare(idx); });
       row.querySelector(".x").addEventListener("click", function(){ state.eventos.splice(idx,1); save(); renderEvents(); });
       li.appendChild(row);
@@ -1244,14 +1260,30 @@
   }
 
   /* ---------------- MI RINCÓN ---------------- */
+  function dentroSemana(iso){ if(!iso) return false; var d=new Date(iso), now=new Date(); var diff=now.getTime()-d.getTime(); return diff>=0 && diff<=7*24*3600*1000; }
+  function progresoHtml(){
+    var hechasSemana=state.eventos.filter(function(e){ return e.hecho && dentroSemana(e.hechoFecha); }).length;
+    var total=state.eventos.length;
+    var hijos=state.hijos.filter(esKid).length;
+    var recientes=state.eventos.filter(function(e){ return e.hecho; }).slice(-4).reverse();
+    var rec = recientes.length
+      ? '<div class="prog-recent"><div class="prl">Lo último que resolviste</div><ul>'+recientes.map(function(e){ return '<li>✓ '+esc(e.texto)+'</li>'; }).join('')+'</ul></div>'
+      : '<div class="prog-recent"><div class="prog-empty">Cada cosa que marques como hecha aparecerá aquí — para que veas, negro sobre blanco, todo lo que logras esta semana. 💛</div></div>';
+    return '<div class="prog"><div class="pl">'+ICO.spark+' Todo lo que haces <span class="pbadge">Esta semana</span></div>'+
+      '<p class="pintro">El trabajo de una mamá casi nunca se ve. Aquí sí — mira todo lo que llevas esta semana.</p>'+
+      '<div class="prog-stats">'+
+        '<div class="pstat"><div class="pn">'+hechasSemana+'</div><div class="pc">resueltas esta semana</div></div>'+
+        '<div class="pstat"><div class="pn">'+hijos+'</div><div class="pc">hijos que cuidas</div></div>'+
+        '<div class="pstat"><div class="pn">'+total+'</div><div class="pc">cosas en tu agenda</div></div>'+
+      '</div>'+rec+'</div>';
+  }
   function renderRincon(){
-    var ideas=ideasHoy();
-    var html='<div class="viewhead"><h2 class="vtitle">'+ICO.heart+' Este espacio es tuyo</h2><p class="vsub">Un momento solo para ti, '+esc(displayName())+'. 💛</p></div>'+
+    var html='<div class="viewhead"><h2 class="vtitle">'+ICO.heart+' Este espacio es tuyo</h2><p class="vsub">Aquí todo es para ti, '+esc(displayName())+'. 💛</p></div>'+
+      progresoHtml()+
       '<div class="carta"><p>'+esc(carta())+'</p></div>'+
       '<div class="versiculo"><div class="vl">'+ICO.book+' Versículo del día</div><p id="versTxt"></p><span class="vref" id="versRef"></span><div class="vint" id="versInt"></div></div>'+
       '<div class="mood"><h3>¿Cómo te sientes hoy?</h3><div class="mood-row" id="moodRow"></div><div class="mood-resp" id="moodResp" hidden></div></div>'+
-      '<div class="sec"><div class="sec-h"><h3>'+ICO.spark+' Tip de belleza de hoy</h3></div><div class="belleza" id="belleza"></div></div>'+
-      '<div class="sec"><div class="sec-h"><h3>Un momento para ti</h3></div><ul class="ideas" id="ideas"></ul></div>';
+      '<div class="sec"><div class="sec-h"><h3>'+ICO.spark+' Tip de belleza de hoy</h3></div><div class="belleza" id="belleza"></div></div>';
     el("view").innerHTML=html;
     var v=versiculo(); el("versTxt").textContent=v.t; el("versRef").textContent=v.ref;
     el("versInt").innerHTML='<span class="vintl">💛 Para tu día</span>'+esc(v.i);
@@ -1263,8 +1295,6 @@
       row.appendChild(b); });
     if(state.mood!=null && MOODS[state.mood]){ var r=el("moodResp"); r.textContent=MOODS[state.mood].r; r.hidden=false; }
     el("belleza").textContent=belleza();
-    var ul=el("ideas"); ideas.forEach(function(x){ var li=document.createElement("li"); li.className="idea";
-      li.innerHTML='<span class="ic">'+x[0]+'</span><span></span>'; li.querySelector("span:last-child").textContent=x[1]; ul.appendChild(li); });
   }
 
   /* ---------------- CLUB DE MAMÁS (vista de ejemplo) ---------------- */
