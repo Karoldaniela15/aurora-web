@@ -414,6 +414,14 @@
   .mh-b:focus-visible { outline:3px solid var(--dawn); outline-offset:2px; }
   .mh-note { margin-top:11px; font-size:.82rem; color:var(--ink-soft); line-height:1.5; background:var(--bg-tint); border:1px solid var(--line); border-radius:11px; padding:10px 13px; }
 
+  /* recordatorios de tareas vencidas */
+  .venc-banner { background:color-mix(in srgb,var(--alert) 12%, transparent); border:1px solid color-mix(in srgb,var(--alert) 30%, transparent); border-radius:12px; padding:11px 13px; font-size:.86rem; color:var(--ink); line-height:1.45; }
+  .item.venc { border-color:color-mix(in srgb,var(--alert) 45%, var(--line)); }
+  .item.venc .date { color:var(--alert); background:color-mix(in srgb,var(--alert) 12%, transparent); }
+  .venc-row { display:flex; align-items:center; gap:8px; margin-top:6px; background:color-mix(in srgb,var(--alert) 10%, transparent); border:1px solid color-mix(in srgb,var(--alert) 30%, transparent); border-radius:11px; padding:8px 11px; font-size:.82rem; }
+  .venc-row .venc-tx { flex:1; color:var(--ink); }
+  .venc-row .venc-done { background:linear-gradient(140deg,var(--dawn),var(--rose)); color:#fff; border:none; border-radius:100px; font:inherit; font-size:.76rem; font-weight:650; padding:5px 12px; cursor:pointer; white-space:nowrap; }
+
   [hidden] { display:none !important; }
 </style>
 
@@ -1149,12 +1157,18 @@
     el("evText").addEventListener("keydown", function(e){ if(e.key==="Enter") addEv(); });
     renderEvents();
   }
+  function taskDT(t){ if(!t.fecha||!t.hora) return null; var dt=new Date(t.fecha+"T"+t.hora); return isNaN(dt.getTime())?null:dt; }
+  function vencido(t){ if(t.hecho) return false; var dt=taskDT(t); return !!(dt && dt.getTime()<Date.now()); }
+  function nRecordatorios(t){ var dt=taskDT(t); if(!dt) return 0; var h=Math.floor((Date.now()-dt.getTime())/3600000); return h<0?0:h+1; }
   function renderEvents(){ var ul=el("events"); if(!ul) return; ul.innerHTML="";
     var evs=state.eventos.slice().sort(function(a,b){ return ((a.fecha||"")+(a.hora||"")).localeCompare((b.fecha||"")+(b.hora||"")); });
     if(!evs.length){ ul.innerHTML='<div class="empty">Sin citas por ahora. Anota una arriba ☝️</div>'; return; }
+    var vencN=state.eventos.filter(vencido).length;
+    if(vencN){ var bn=document.createElement("div"); bn.className="venc-banner"; bn.textContent="⏰ Aurora te está recordando "+vencN+" pendiente"+(vencN>1?"s":"")+" — cada hora, hasta que lo marques hecho. 💛"; ul.appendChild(bn); }
     evs.forEach(function(t){ var idx=state.eventos.indexOf(t);
       var li=document.createElement("li"); li.className="taskli";
-      var row=document.createElement("div"); row.className="item"+(t.hecho?" done":"");
+      var venc=vencido(t);
+      var row=document.createElement("div"); row.className="item"+(t.hecho?" done":"")+(venc?" venc":"");
       row.innerHTML='<span class="date"></span><button class="chk" aria-label="Marcar">'+(t.hecho?"✓":"")+'</button><span class="tx"></span><button class="shr" aria-label="Compartir con la familia" title="Compartir con la familia">'+SVG_PEOPLE+'</button><button class="x" aria-label="Borrar">✕</button>';
       row.querySelector(".date").innerHTML=fmt(t.fecha,true);
       row.querySelector(".tx").innerHTML=esc(t.texto)+(t.hora?' <span class="etime">'+esc(hora12(t.hora))+'</span>':'');
@@ -1162,6 +1176,10 @@
       row.querySelector(".shr").addEventListener("click", function(){ openShare(idx); });
       row.querySelector(".x").addEventListener("click", function(){ state.eventos.splice(idx,1); save(); renderEvents(); });
       li.appendChild(row);
+      if(venc){ var n=nRecordatorios(t); var vr=document.createElement("div"); vr.className="venc-row";
+        vr.innerHTML='<span class="venc-tx">⏰ Te lo recuerdo cada hora hasta que esté hecho'+(n>1?' · van '+n+' recordatorios':'')+'</span><button class="venc-done">Ya está</button>';
+        vr.querySelector(".venc-done").addEventListener("click", function(){ t.hecho=true; t.hechoFecha=new Date().toISOString(); save(); renderEvents(); });
+        li.appendChild(vr); }
       if(t.asig){ var ar=document.createElement("div"); ar.className="asig-row asig-"+(t.asig.estado||"pendiente");
         var tx=(t.asig.estado==="confirmado")?('✅ '+esc(t.asig.nombre)+' ya se encargó'):((t.asig.estado==="nadie")?'⚠ Nadie de tu red pudo esta vez':('👥 A cargo de '+esc(t.asig.nombre)+' · Aurora da seguimiento'));
         ar.innerHTML='<span class="asig-tx">'+tx+'</span><button class="asig-see">Ver seguimiento</button><button class="asig-un" aria-label="Quitar">✕</button>';
