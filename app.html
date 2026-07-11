@@ -434,6 +434,16 @@
 
   .chip.cond { color:var(--plum); background:color-mix(in srgb,var(--plum) 12%, transparent); border-color:color-mix(in srgb,var(--plum) 32%, transparent); }
 
+  /* embarazo */
+  .preg-add { width:100%; font:inherit; font-size:.95rem; font-weight:650; color:var(--plum); background:color-mix(in srgb,var(--plum) 8%, var(--bg-elev)); border:1px dashed color-mix(in srgb,var(--plum) 40%, var(--line)); border-radius:14px; padding:13px; cursor:pointer; margin-bottom:18px; }
+  .preg-add:hover { border-style:solid; }
+  .preg-fam { display:flex; align-items:center; gap:12px; background:linear-gradient(150deg, color-mix(in srgb,var(--plum) 14%, var(--bg-elev)), var(--bg-elev)); border:1px solid color-mix(in srgb,var(--plum) 30%, var(--line)); border-radius:16px; padding:13px 15px; margin-bottom:18px; }
+  .pf-em { font-size:24px; flex:none; }
+  .pf-info { flex:1; min-width:0; } .pf-info b { font-size:1.02rem; } .pf-info span { display:block; font-size:.82rem; color:var(--ink-soft); }
+  .pf-ed { background:none; border:1px solid var(--line); color:var(--ink); border-radius:100px; font:inherit; font-size:.82rem; padding:7px 13px; cursor:pointer; white-space:nowrap; }
+  .preg-card { border-color:color-mix(in srgb,var(--plum) 35%, var(--line)); background:linear-gradient(160deg, color-mix(in srgb,var(--plum) 8%, var(--bg)), var(--bg)); }
+  .preg-card .em { background:color-mix(in srgb,var(--plum) 15%, var(--bg-tint)); }
+
   [hidden] { display:none !important; }
 </style>
 
@@ -628,6 +638,17 @@
     <p class="seg-intro">Así acompaña Aurora al familiar. Toca los botones para ver cómo responde — en la app real esto pasa por WhatsApp.</p>
     <div class="feed" id="segFeed"></div>
     <div class="seg-act" id="segAct"></div>
+  </div>
+</div>
+
+<!-- SHEET: EMBARAZO -->
+<div class="sheet-bg" id="embBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="embTitle">
+    <div class="sheet-h"><h3 id="embTitle">Tu bebé en camino 🤰</h3><button class="close" id="embClose" aria-label="Cerrar">✕</button></div>
+    <p class="seg-intro">Cuéntame para acompañarte semana a semana en tu embarazo. 💛</p>
+    <div class="field"><label for="embFpp">Fecha probable de parto</label><input type="date" id="embFpp"></div>
+    <button class="btn" id="embSave">Guardar</button>
+    <div class="del-member"><button id="embDel" hidden>Ya no estoy embarazada</button></div>
   </div>
 </div>
 
@@ -1304,11 +1325,59 @@
   }
 
   /* ---------------- CRECER (desarrollo) ---------------- */
+  /* ---------------- EMBARAZO ---------------- */
+  function semanaEmb(){ if(!state.embarazo||!state.embarazo.fpp) return null; var fpp=new Date(state.embarazo.fpp+"T00:00:00"); if(isNaN(fpp.getTime())) return null; var diasRest=Math.round((fpp.getTime()-Date.now())/86400000); var sem=40-Math.floor(diasRest/7); if(sem<1) sem=1; if(sem>42) sem=42; return sem; }
+  function embContent(sem){
+    if(sem<14) return { trim:"Primer trimestre",
+      bebe:"Tu bebé se está formando muy rápido: corazón, cerebro y los órganos principales. Va del tamaño de una semillita a una fresa.",
+      cuerpo:"Náuseas, mucho sueño y cambios de ánimo son normales — tu cuerpo trabaja a mil, aunque por fuera casi no se note.",
+      alerta:["Sangrado o cólicos fuertes","Vómitos que no te dejan retener ni líquidos","Fiebre alta"],
+      tip:"Toma tu ácido fólico, descansa sin culpa y come poquito y seguido para las náuseas." };
+    if(sem<28) return { trim:"Segundo trimestre",
+      bebe:"Ya se mueve, empieza a oír tu voz y crece rápido — del tamaño de un aguacate a un mango. Pronto sentirás sus pataditas.",
+      cuerpo:"Suele ser la etapa más llevadera: vuelve algo de energía y bajan las náuseas. Quizá ya se note tu pancita.",
+      alerta:["Dejar de sentir movimientos cuando ya los sentías","Sangrado","Dolor de cabeza fuerte con visión borrosa o hinchazón (posible preeclampsia)"],
+      tip:"Aprovecha esta energía para ir preparando lo del bebé con calma. Hidrátate y muévete suave." };
+    return { trim:"Tercer trimestre",
+      bebe:"Ya casi listo: gana peso, se acomoda de cabeza y sus pulmones terminan de madurar — del tamaño de una piña a una sandía.",
+      cuerpo:"Más cansancio y peso, y muchas ganas de conocerlo. Las contracciones de práctica (Braxton Hicks) son normales.",
+      alerta:["Contracciones seguidas antes de tiempo","Se rompe la fuente","Sientes menos movimientos del bebé","Hinchazón fuerte, dolor de cabeza o visión borrosa"],
+      tip:"Prepara tu bolso para el hospital, descansa, y ten a mano el plan para cuando empiece el trabajo de parto." };
+  }
+  function pregCardHtml(sem){
+    var c=embContent(sem);
+    var faltan=(state.embarazo&&state.embarazo.fpp)?Math.round((new Date(state.embarazo.fpp+"T00:00:00").getTime()-Date.now())/86400000):null;
+    var sub='Semana '+sem+' · '+c.trim+((faltan!=null&&faltan>0)?' · faltan ~'+Math.ceil(faltan/7)+' semanas':'');
+    var alertaLis=c.alerta.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join("");
+    return '<div class="devcard preg-card"><div class="dhead"><span class="em">🤰</span><div><b>Tu bebé en camino</b><span>'+esc(sub)+'</span></div></div>'+
+      '<div class="dblock esperar"><div class="dl">'+ICO.spark+' Tu bebé ahora</div><p>'+esc(c.bebe)+'</p></div>'+
+      '<div class="dblock normal"><div class="dl">'+ICO.check+' En tu cuerpo</div><p>'+esc(c.cuerpo)+'</p></div>'+
+      '<div class="dblock alerta"><div class="dl">'+ICO.alert+' Llama a tu médico si…</div><ul>'+alertaLis+'</ul></div>'+
+      '<div class="dtip">'+ICO.bulb+' <b>Consejo para ti:</b> '+esc(c.tip)+'</div>';
+  }
+  function renderPreg(){ var w=el("pregWrap"); if(!w) return; var sem=semanaEmb();
+    if(sem){ var fppTxt=state.embarazo.fpp?fmt(state.embarazo.fpp):"";
+      w.innerHTML='<div class="preg-fam"><span class="pf-em">🤰</span><div class="pf-info"><b>Esperando un bebé</b><span>Semana '+sem+(fppTxt?' · llega ~'+esc(fppTxt):'')+'</span></div><button class="pf-ed" id="pregEdit">Editar</button></div>';
+      el("pregEdit").addEventListener("click", openEmb);
+    } else {
+      w.innerHTML='<button class="preg-add" id="pregAdd">🤰 Estoy esperando un bebé</button>';
+      el("pregAdd").addEventListener("click", openEmb);
+    }
+  }
+  var embDelArmed=false, embDelTimer=null;
+  function openEmb(){ el("embFpp").value=(state.embarazo&&state.embarazo.fpp)||""; el("embDel").hidden=!(state.embarazo&&state.embarazo.fpp); embDelArmed=false; el("embDel").textContent="Ya no estoy embarazada"; el("embBg").hidden=false; }
+  el("embClose").addEventListener("click", function(){ el("embBg").hidden=true; });
+  el("embBg").addEventListener("click", function(e){ if(e.target===el("embBg")) el("embBg").hidden=true; });
+  el("embSave").addEventListener("click", function(){ var f=el("embFpp").value; if(!f){ el("embFpp").focus(); return; } state.embarazo={ fpp:f }; save(); el("embBg").hidden=true; renderTab(); });
+  el("embDel").addEventListener("click", function(){ if(!embDelArmed){ embDelArmed=true; el("embDel").textContent="¿Seguro? Toca de nuevo"; embDelTimer=setTimeout(function(){ embDelArmed=false; el("embDel").textContent="Ya no estoy embarazada"; },4000); return; } clearTimeout(embDelTimer); embDelArmed=false; el("embDel").textContent="Ya no estoy embarazada"; state.embarazo=null; save(); el("embBg").hidden=true; renderTab(); });
+
   function renderDev(){
     var kids=state.hijos.filter(function(m){ return esKid(m)&&hasAge(m); });
-    var html='<div class="viewhead"><h2 class="vtitle">'+ICO.grow+' Cómo va creciendo</h2><p class="vsub">Qué esperar de cada hijo según su edad exacta.</p></div><div id="devlist"></div><p class="tip-note">Información general de orientación 💛 No reemplaza la opinión de tu pediatra.</p>';
-    el("view").innerHTML=html; var box=el("devlist");
-    if(!kids.length){ box.innerHTML='<div class="empty">Agrega la edad de tus hijos (en la pestaña Familia) para ver su desarrollo.</div>'; return; }
+    var sem=semanaEmb();
+    var html='<div class="viewhead"><h2 class="vtitle">'+ICO.grow+' Cómo va creciendo</h2><p class="vsub">Tu bebé en camino y cada hijo, según su etapa.</p></div>'+(sem?'<div id="pregdev"></div>':'')+'<div id="devlist"></div><p class="tip-note">Información general de orientación 💛 No reemplaza la opinión de tu médico o pediatra.</p>';
+    el("view").innerHTML=html; if(sem) el("pregdev").innerHTML=pregCardHtml(sem);
+    var box=el("devlist");
+    if(!kids.length){ box.innerHTML=sem?'<div class="empty" style="margin-top:14px">Cuando nazca tu bebé, aquí verás su desarrollo mes a mes. 💛</div>':'<div class="empty">Agrega la edad de tus hijos (en la pestaña Familia) para ver su desarrollo.</div>'; return; }
     var day=dayIndex();
     kids.forEach(function(m,i){ var d=devFor(m); var g=genero(m);
       var c=document.createElement("div"); c.className="devcard";
@@ -1610,9 +1679,11 @@
     var incompletos=state.hijos.filter(function(m){ var e=fichaEstado(m); return e.done<e.total; }).length;
     var nudge = incompletos ? '<div class="fam-nudge">💛 <b>Completa la ficha de cada hijo</b> para que Aurora te dé consejos y recordatorios más personalizados. '+(incompletos===1?'Falta 1 ficha por completar.':'Faltan '+incompletos+' fichas por completar.')+'</div>' : '';
     el("view").innerHTML='<div class="viewhead"><h2 class="vtitle">'+ICO.fam+' Tu familia</h2><p class="vsub">Tu red de apoyo y la ficha de cada integrante.</p></div>'+
+      '<div id="pregWrap"></div>'+
       '<div id="redWrap"></div>'+
       '<div class="fam-sec-t">Fichas de tu familia</div>'+
       nudge+'<div id="members"></div><button class="btn ghost" id="addMore" style="margin-top:6px">＋ Agregar integrante</button>';
+    renderPreg();
     renderRed();
     el("addMore").addEventListener("click", function(){ var m={ id:uid(), nombre:"", anos:"", meses:"", sexo:"", rol:"Hijo/a", cumple:"", colegio:"", tutorNom:"", tutorTel:"", pedNom:"", pedTel:"", alim:[], notas:"" }; state.hijos.push(m); save(); openSheet(m.id); });
     var box=el("members"); if(!state.hijos.length){ box.innerHTML='<div class="empty">Aún no hay nadie. Agrega un integrante abajo.</div>'; return; }
