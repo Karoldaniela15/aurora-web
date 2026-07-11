@@ -1183,7 +1183,7 @@
     el("view").innerHTML=
       '<h2 class="hello">¡Hola, <span class="n">'+esc(displayName())+'</span>! 💛</h2>'+
       '<div class="bubbles"><div class="lbl">'+ICO.sun+' Tu buenos días</div><div class="bub" id="gm"></div></div>'+
-      '<button class="ask-card" id="askAurora">'+ICO.chat+'<div class="ask-tx"><b>Pregúntale a Aurora</b><span>Tu amiga sabia, cuando la necesites</span></div><span class="ask-arrow">→</span></button>'+
+      '<button class="ask-card" id="askAurora">'+ICO.chat+'<div class="ask-tx"><b>Hablar con Aurora</b><span>Tu amiga sabia, cuando la necesites</span></div><span class="ask-arrow">→</span></button>'+
       '<div class="sabias"><div class="sl">'+ICO.bulb+' ¿Sabías que…?</div><p id="sabiasTxt"></p><span class="sfoot">Un dato nuevo cada día</span></div>'+
       '<div class="sec"><div class="sec-h"><h3>'+ICO.cal+' Citas y eventos</h3></div>'+
         '<div class="addbar">'+
@@ -1297,16 +1297,12 @@
     if(state.chatPriv==="findia" && state.chatDia && state.chatDia!==hoyStr()){ state.chat=[]; }
     if(!state.chat.length){ state.chat.push({ me:false, t:"¡Hola, "+(displayName())+"! Soy Aurora 💛 Cuéntame lo que sea — una duda o lo que llevas por dentro. Este es tu espacio seguro, entre tú y yo, y nunca te voy a juzgar." }); save(); }
     el("view").innerHTML=
-      '<div class="viewhead"><button class="linklike" id="chatBack">← Volver</button><h2 class="vtitle" style="margin-top:8px">'+ICO.chat+' Pregúntale a Aurora</h2><p class="vsub">Aquí puedes desahogarte con confianza, como con tu mejor amiga. Lo que hablemos queda entre tú y yo. 💛</p></div>'+
+      '<div class="viewhead"><button class="linklike" id="chatBack">← Volver</button><h2 class="vtitle" style="margin-top:8px">'+ICO.chat+' Hablar con Aurora</h2><p class="vsub">Aquí puedes desahogarte con confianza, como con tu mejor amiga. Lo que hablemos queda entre tú y yo. 💛</p></div>'+
       '<div class="chat-priv" id="chatPriv"></div>'+
-      '<div class="chat-chips" id="chatChips"></div>'+
       '<div class="feed" id="chatFeed"></div>'+
-      '<div class="cbar"><input type="text" id="chatInput" placeholder="Escribe tu pregunta…"><button class="btn small" id="chatSend">Enviar</button></div>'+
+      '<div class="cbar"><input type="text" id="chatInput" placeholder="Escríbeme lo que quieras…"><button class="btn small" id="chatSend">Enviar</button></div>'+
       '<p class="tip-note">Aurora te orienta con cariño; no reemplaza a un profesional. En una emergencia, acude a urgencias.</p>';
     renderChatPriv();
-    var chips=el("chatChips");
-    CHAT_SUGG.forEach(function(s){ var b=document.createElement("button"); b.className="club-chip"; b.type="button"; b.textContent=s.c;
-      b.addEventListener("click", function(){ chatAsk(s.c); }); chips.appendChild(b); });
     el("chatBack").addEventListener("click", function(){ if(state.chatPriv==="enseguida"){ state.chat=[]; save(); } state.tab="hoy"; save(); renderTab(); });
     el("chatSend").addEventListener("click", function(){ chatAsk(el("chatInput").value); });
     el("chatInput").addEventListener("keydown", function(e){ if(e.key==="Enter") chatAsk(el("chatInput").value); });
